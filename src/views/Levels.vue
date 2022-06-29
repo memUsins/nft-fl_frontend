@@ -146,7 +146,15 @@ export default {
   },
   computed: { ...mapGetters(["getAccountInfo", "getContractInfo"]) },
   mounted() {
-    this.init();
+    if (typeof window.ethereum === undefined)
+      this.$router.push({ name: "Home" });
+
+    let address = this.getAccountInfo.address;
+    window.ethereum.request({ method: "eth_requestAccounts" }).then((res) => {
+      this.$store.dispatch("getAccountInfo", res[0]);
+      address = this.getAccountInfo.address;
+    });
+    this.init(address);
   },
   methods: {
     // Clicked
@@ -177,11 +185,7 @@ export default {
     },
 
     // Init
-    init() {
-      const address = this.getAccountInfo.address;
-      if (!this.getAccountInfo.address || typeof window.ethereum === undefined)
-        this.$router.push({ name: "Home" });
-
+    init(address) {
       this.$store.dispatch("getFullUserInfo", address);
       this.$store.dispatch("getUserTableProgress", address);
       this.$store.dispatch("getUserLevels", address);
@@ -191,10 +195,8 @@ export default {
       this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.id}`;
     },
   },
-  watch: {
-    getAccountInfo() {
-      this.init();
-    },
+  updated() {
+    this.init(this.getAccountInfo.address);
   },
 };
 </script>

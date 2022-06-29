@@ -66,7 +66,7 @@ export default {
     getAccountError() {
       if (this.getAccountError.name == "ADDRESS_USED") {
         this.$store.dispatch("getAccountInfo", this.getAccountInfo.address);
-        this.$router.push({ name: "Levels" });
+        if (this.getAccountInfo.password) this.$router.push({ name: "Levels" });
       }
     },
   },

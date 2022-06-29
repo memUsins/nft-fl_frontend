@@ -345,7 +345,7 @@ export default {
                 });
         },
         clearAccountError(ctx) {
-            ctx.commit("setError", {
+            ctx.commit("setAccountError", {
                 msg: null,
                 name: null,
                 env: null
@@ -380,9 +380,12 @@ export default {
 
         // user
         setAccountInfo(state, data) {
-            state.accountInfo = {
+            let info = {
+                ...state.accountInfo,
                 ...data
             };
+
+            state.accountInfo = info;
         },
         setAccountId(state, data) {
             state.accountInfo.id = data;
