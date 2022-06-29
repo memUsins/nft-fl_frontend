@@ -1,0 +1,47 @@
+@font-face {
+    font-family: "PT mono";
+    src: url("./PTMono-Regular.ttf");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "PT mono";
+    src: url("./PT-Mono_Bold.woff");
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Black.ttf");
+    font-weight: 900;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Bold.ttf");
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Medium.ttf");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Regular.ttf");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Light.ttf");
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: "TTOctosquares";
+    src: url("./TTOctosquares-Thin.ttf");
+    font-weight: 200;
+}
