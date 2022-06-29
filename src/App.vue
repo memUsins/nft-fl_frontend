@@ -27,8 +27,8 @@ export default {
   },
   methods: {
     redirect() {
-      // if (this.getAccountInfo.password) this.$router.push({ name: "Levels" });
-      if (this.getAccountInfo.password) console.log("redirect");
+      if (this.getAccountInfo.password) this.$router.push({ name: "Levels" });
+      // if (this.getAccountInfo.password) console.log("redirect");
     },
   },
   watch: {
