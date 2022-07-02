@@ -36,9 +36,6 @@ export default {
       this.redirect();
     },
   },
-  updated() {
-    this.$store.dispatch("initAccount");
-  },
   components: { EmptyLayout, MainLayout },
 };
 </script>

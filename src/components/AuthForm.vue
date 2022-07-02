@@ -15,13 +15,10 @@
       <h3>Ошибка!</h3>
       <p>Вы не авторизованы!</p>
     </div>
-    <errorModal v-if="getAccountError.name == 'ADDRESS_USED'" propIsOpen="true"
+    <errorModal v-if="getError.name == 'ADDRESS_USED'" propIsOpen="true"
       >Аккаунт с таким адресом существует
     </errorModal>
-    <errorModal
-      v-if="getAccountError.name == 'PASSWORD_USED'"
-      propIsOpen="true"
-    >
+    <errorModal v-if="getError.name == 'PASSWORD_USED'" propIsOpen="true">
       Данный пароль уже активирован
     </errorModal>
   </form>
@@ -41,7 +38,7 @@ export default {
   },
   components: { errorModal },
   computed: {
-    ...mapGetters(["getAccountInfo", "getAccountError"]),
+    ...mapGetters(["getAccountInfo", "getError"]),
     checkPass() {
       return {
         error: this.password !== null && !this.password,
@@ -63,8 +60,8 @@ export default {
     },
   },
   watch: {
-    getAccountError() {
-      if (this.getAccountError.name == "ADDRESS_USED") {
+    getError() {
+      if (this.getError.name == "ADDRESS_USED") {
         this.$store.dispatch("getAccountInfo", this.getAccountInfo.address);
         if (this.getAccountInfo.password) this.$router.push({ name: "Levels" });
       }

@@ -1,6 +1,6 @@
 <template>
   <div class="modal block block_bg" :class="{ open: isOpen }">
-    <h3 class="title">Ошибка!</h3>
+    <h3 class="title">Успешно!</h3>
     <p class="description"><slot></slot></p>
     <span class="close" @click="closeModal">X</span>
   </div>
@@ -18,7 +18,7 @@ export default {
   methods: {
     closeModal() {
       this.isOpen = false;
-      this.$store.dispatch("clearError");
+      this.$store.dispatch("clearSuccess");
     },
   },
 };

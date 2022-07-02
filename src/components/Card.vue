@@ -9,7 +9,7 @@
       <ul class="list">
         <li class="item level-info">
           <span class="level">{{ cardData.lvl }} lvl</span>
-          <span class="price">{{ cardData.price }} lvl</span>
+          <span class="price">{{ cardData.price }} ETH</span>
         </li>
         <div class="line">
           <div
@@ -43,9 +43,11 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "card",
   props: ["cardData"],
+  computed: { ...mapGetters(["getContractInfo"]) },
   methods: {
     Buy(id) {
       return this.$emit("BUY-cardId", id);

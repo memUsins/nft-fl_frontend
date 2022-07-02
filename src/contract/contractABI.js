@@ -440,6 +440,13 @@ export default {
             "type": "function"
         },
         {
+            "inputs": [],
+            "name": "LootBox",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
             "inputs": [{
                 "internalType": "address",
                 "name": "_addressKey",

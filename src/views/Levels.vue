@@ -17,6 +17,21 @@
           @BUY-cardId="buyTableEvent"
           @REINVEST-cardId="reinvestCardEvent"
         ></Card>
+        <SuccessModal :propIsOpen="getContractInfo.contractResponse">
+          Стол был успешно куплен!
+        </SuccessModal>
+        <ErrorModal
+          v-if="getContractInfo.error.msg === 'Level already active'"
+          :propIsOpen="true"
+        >
+          Стол уже куплен!
+        </ErrorModal>
+        <ErrorModal
+          v-if="getContractInfo.error.msg === 'Not enoight token'"
+          :propIsOpen="true"
+        >
+          Недостаточно средств для реинвеста!
+        </ErrorModal>
       </ul>
 
       <!-- Background -->
@@ -41,15 +56,21 @@
           </li>
           <li class="item">
             <p>referers:</p>
-            <span>{{ getContractInfo.accountInfo.referalAddress }}</span>
+            <span>{{ getContractInfo.accountInfo.referalCount }}</span>
           </li>
           <li class="item">
             <p>reward from tables:</p>
             <span>{{ getContractInfo.accountInfo.paymant.table }}</span>
           </li>
-          <li class="item" style="margin-bottom: 15px">
+          <li class="item">
             <p>reward from referers:</p>
             <span>{{ getContractInfo.accountInfo.paymant.referal }}</span>
+          </li>
+        </ul>
+        <ul class="block">
+          <li class="item">
+            <p>reinvest value:</p>
+            <span>{{ getContractInfo.accountInfo.paymant.pullDeposit }}</span>
           </li>
           <li class="item">
             <p>общий онлайн:</p>
@@ -62,24 +83,6 @@
           <li class="item">
             <p>общий оборот:</p>
             <span>{{ getContractInfo.globalInfo.tableMoney }}</span>
-          </li>
-        </ul>
-        <ul class="block">
-          <li class="item">
-            <p>reinvest value:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.pullDeposit }}</span>
-          </li>
-          <li class="item">
-            <p>farming:</p>
-            <span>100</span>
-          </li>
-          <li class="item">
-            <p>reward from farming:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.pull }}</span>
-          </li>
-          <li class="item">
-            <p>reward from partners:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.pullReferal }}</span>
           </li>
         </ul>
         <ul class="block info">
@@ -121,56 +124,69 @@
         class="background background_first"
       />
     </div>
+    <div class="loading overlay" v-show="isLoading">
+      Загрузка, пожалуйста, подождите..
+    </div>
   </div>
 </template>
 
 <script>
 import Card from "./../components/Card.vue";
+import SuccessModal from "./../components/SuccessModal.vue";
+import ErrorModal from "./../components/ErrorModal.vue";
+
 import { mapGetters } from "vuex";
 
 export default {
   name: "levels",
-  components: { Card },
+  components: { Card, SuccessModal, ErrorModal },
   data() {
     return {
-      // contract: {
-      //   ViewAddress: process.env.VUE_APP_VIEW_ADDRESS,
-      //   MatrixAddress: process.env.VUE_APP_MATRIX_ADDRESS,
-      //   ReinvestAddress: process.env.VUE_APP_REINVEST_ADDRESS,
-      //   ViewContract: null,
-      //   MatrixContract: null,
-      //   ReinvestContract: null,
-      //   gasBuy: 900000,
-      // },
+      isLoading: true,
+      referalLink: null,
+      address: null,
     };
   },
-  computed: { ...mapGetters(["getAccountInfo", "getContractInfo"]) },
+  computed: {
+    ...mapGetters(["getAccountInfo", "getContractInfo", "getError"]),
+  },
   mounted() {
-    if (typeof window.ethereum === undefined)
+    if (typeof window.ethereum === "undefined")
       this.$router.push({ name: "Home" });
 
-    let address = this.getAccountInfo.address;
-    window.ethereum.request({ method: "eth_requestAccounts" }).then((res) => {
-      this.$store.dispatch("getAccountInfo", res[0]);
-      address = this.getAccountInfo.address;
+    this.address = this.getAccountInfo.address;
+
+    window.ethereum.on("accountsChanged", (accounts) => {
+      this.address = accounts[0];
+      this.init();
     });
-    this.init(address);
+
+    this.init();
   },
   methods: {
     // Clicked
-    buyTableEvent(value) {
-      const tableInfo = [
-        this.getAccountInfo.address,
-        value.lvl,
-        value.price,
-        this.getAccountInfo.referalId,
-      ];
-      this.$store.dispatch("buyTable", tableInfo);
+    async buyTableEvent(value) {
+      const tableInfo = {
+        lvl: value.lvl,
+        price: value.price,
+        referalId: this.getAccountInfo.referalId,
+      };
+      await this.$store.dispatch("buyTable", tableInfo);
+      if (!this.getError.msg) {
+        await this.$store.dispatch("getFullUserInfo", this.address);
+        await this.$store.dispatch("getUserLevels", this.address);
+        await this.$store.dispatch("getUserTableProgress", this.address);
+        await this.$store.dispatch("getGlobalStat", this.address);
+        await this.$store.dispatch("GetPullsInfo", this.address);
+      }
     },
 
     // Clicked
     reinvestCardEvent(value) {
-      console.log("From the child2:", value);
+      const tableInfo = {
+        lvl: value.lvl,
+      };
+      this.$store.dispatch("reinvest", tableInfo);
     },
 
     // Copy
@@ -184,19 +200,42 @@ export default {
       }
     },
 
-    // Init
-    init(address) {
-      this.$store.dispatch("getFullUserInfo", address);
-      this.$store.dispatch("getUserTableProgress", address);
-      this.$store.dispatch("getUserLevels", address);
-      this.$store.dispatch("getGlobalStat", address);
+    activedTable() {
+      let tables = this.getContractInfo.cardData;
+      if (!tables[0].isActived) {
+        this.$store.dispatch("activeTable", { lvl: 1, status: true });
+      }
+    },
 
+    // Init
+    async init() {
+      this.isLoading = true;
+
+      await window.ethereum
+        .request({ method: "eth_requestAccounts" })
+        .then((res) => {
+          this.$store.dispatch("getAccountInfo", res[0]);
+          this.address = res[0];
+        });
+
+      await this.$store.dispatch("clearAccountInfo");
+      await this.$store.dispatch("getAccountInfo", this.address);
+      if (!this.getAccountInfo.password) this.$router.push({ name: "Home" });
+
+      await this.$store.dispatch("getFullUserInfo", this.address);
+      await this.$store.dispatch("getUserLevels", this.address);
+      await this.$store.dispatch("getUserTableProgress", this.address);
+      await this.$store.dispatch("getGlobalStat", this.address);
+      await this.$store.dispatch("GetPullsInfo", this.address);
+      await this.activedTable();
+
+      this.isLoading = false;
       // Create ref link
-      this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.id}`;
+      this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.address}`;
     },
   },
   updated() {
-    this.init(this.getAccountInfo.address);
+    // this.init(this.getAccountInfo.address);
   },
 };
 </script>

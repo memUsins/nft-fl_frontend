@@ -288,6 +288,14 @@
       <!-- Form -->
       <AuthForm></AuthForm>
     </div>
+    <div class="is-have-ethereum" v-if="!isEthereum">
+      <p>
+        В Вашем браузере отсутствует Metamask. Попробуйте перезагрузить страницу
+        или
+        <a href="https://metamask.io/">установить расширение Metamask</a> в ваш
+        браузер
+      </p>
+    </div>
   </div>
 </template>
 
@@ -296,6 +304,14 @@ import AuthForm from "./../components/AuthForm.vue";
 
 export default {
   name: "home",
+  data() {
+    return {
+      isEthereum: false,
+    };
+  },
+  mounted() {
+    if (typeof window.ethereum !== "undefined") this.isEthereum = true;
+  },
   components: { AuthForm },
 };
 </script>

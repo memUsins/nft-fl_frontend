@@ -5,18 +5,9 @@ const web3 = new Web3("http://localhost:8545");
 
 // Default gas
 const gasBuy = 900000;
-// const viewContract = new web3.eth.Contract(
-//     contractABI.viewAbi,
-//     process.env.VUE_APP_VIEW_ADDRESS
-// );
-const matrixContract = new web3.eth.Contract(
-    contractABI.matrixAbi,
-    process.env.VUE_APP_MATRIX_ADDRESS
-);
-const reinvestContract = new web3.eth.Contract(
-    contractABI.reinvestAbi,
-    process.env.VUE_APP_REINVEST_ADDRESS
-);
+const viewContract = new web3.eth.Contract(contractABI.viewAbi, process.env.VUE_APP_VIEW_ADDRESS);
+const matrixContract = new web3.eth.Contract(contractABI.matrixAbi, process.env.VUE_APP_MATRIX_ADDRESS);
+const reinvestContract = new web3.eth.Contract(contractABI.reinvestAbi, process.env.VUE_APP_REINVEST_ADDRESS);
 
 export default {
     actions: {
@@ -54,20 +45,6 @@ export default {
         },
 
         /**
-         * initAccount
-         *
-         * @returns {Object}
-         */
-        async initAccount(ctx) {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-            let metaAdress = accounts[0];
-
-            ctx.dispatch("getAccountInfo", metaAdress);
-        },
-
-        /**
          * buyTable
          *
          * @param {string} address account address
@@ -77,20 +54,48 @@ export default {
          *
          * @returns {Object}
          */
-        async buyTable(ctx, table, sum, refId) {
-            ctx.dispatch("initAccount");
-            console.log(ctx.state)
-            const address = ctx.state.account.address;
+        async buyTable(ctx, data) {
+            // Get address
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => (address = res[0]));
 
-            let data = {
+            let price = String(data.price);
+
+            let qdata = {
                 from: address,
-                value: sum,
+                value: web3.utils.toWei(price, "ether"),
                 gas: gasBuy,
             };
+
             await matrixContract.methods
-                .buyTable(table, refId)
-                .send(data)
-                .catch((err) => ctx.commit("setError", err));
+                .BuyTable(data.lvl, data.referalId || 0)
+                .send(qdata)
+                .then(() => {
+                    ctx.dispatch("activeTable", {
+                        lvl: data.lvl + 1,
+                        status: true,
+                    });
+                    ctx.commit("setSuccess", true);
+                })
+                .catch((err) => {
+                    if (err.message.indexOf("Level already active") !== -1) {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: "Level already active",
+                            env: err.stack,
+                        });
+                    } else {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: err.message,
+                            env: err.stack,
+                        });
+                    }
+                });
         },
 
         /**
@@ -102,16 +107,34 @@ export default {
          *
          * @returns {Object}
          */
-        async pullReward(ctx, address, pullId, sum) {
+        async pullReward(ctx, pullId, sum) {
+            // Get address
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => (address = res[0]));
+
             let data = {
                 from: address,
                 value: sum,
                 gas: gasBuy,
             };
+
             await reinvestContract.methods
                 .RewardToPull(pullId)
                 .send(data)
-                .catch((err) => ctx.commit("setError", err));
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((err) => {
+                    ctx.commit("setError", {
+                        name: err.name,
+                        msg: err.message,
+                        env: err.stack,
+                    });
+                });
         },
 
         /**
@@ -122,16 +145,49 @@ export default {
          *
          * @returns {Object}
          */
-        async reinvest(ctx, address, table) {
+        async reinvest(ctx, table) {
+            // Get address
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => (address = res[0]));
+
             let data = {
                 from: address,
                 value: 0,
                 gas: gasBuy,
             };
             await reinvestContract.methods
-                .ReinvestTable(table, address)
+                .ReinvestTable(table.lvl, address)
                 .send(data)
-                .catch((err) => ctx.commit("setError", err));
+                .then(() => {
+                    let dataLvl;
+                    if (data.lvl + 1 != 16) dataLvl = ++data.lvl;
+                    else dataLvl = data.lvl;
+
+                    ctx.dispatch("activeTable", {
+                        lvl: dataLvl,
+                        status: true,
+                    });
+                    ctx.commit("setSuccess", true);
+                })
+                .catch((err) => {
+                    if (err.message.indexOf("Not enoight token") !== -1) {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: "Not enoight token",
+                            env: err.stack,
+                        });
+                    } else {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: err.message,
+                            env: err.stack,
+                        });
+                    }
+                });
         },
 
         /**
@@ -142,35 +198,38 @@ export default {
          * @returns {Object}
          */
         async getFullUserInfo(ctx) {
-            let results = [2, "addressRef", 10, [11, 9, 8, 7, 6]];
-
-            let response = {
-                id: results[0],
-                referalAddress: results[1],
-                referalCount: results[2],
-                paymant: {
-                    table: results[3][0],
-                    referal: results[3][1],
-                    pullDeposit: results[3][2],
-                    pull: results[3][3],
-                    pullReferal: results[3][4],
-                },
-            };
-
-            ctx.commit("setAccountInfo", response);
-
-
             // await ctx.dispatch("connect");
-            // let userInfo = await viewContract.methods
-            //     .GetFullUserInfo(address)
-            //     .call({
-            //         from: address,
-            //     })
-            //     .then((res) => {
-            //         console.log(res);
-            //     })
-            //     .catch((err) => console.log(err));
-            // return userInfo;
+
+            // Get address
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => (address = res[0]));
+
+            await viewContract.methods
+                .GetFullUserInfo(address)
+                .call({
+                    from: address,
+                })
+                .then((res) => {
+                    let response = {
+                        webId: res[0],
+                        referalAddress: res[1],
+                        referalCount: res[2],
+                        paymant: {
+                            table: web3.utils.fromWei(String(res[3][0]), "ether"),
+                            referal: web3.utils.fromWei(String(res[3][1]), "ether"),
+                            pullDeposit: res[3][2],
+                            pull: res[3][3],
+                            pullReferal: res[3][4],
+                        },
+                    };
+
+                    ctx.commit("setAccountInfo", response);
+                })
+                .catch((err) => console.log(err));
         },
 
         /**
@@ -181,28 +240,43 @@ export default {
          * @returns {Array}
          */
         async getUserTableProgress(ctx) {
-            let response = [0, 10, 20, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 10];
-
-            ctx.commit("setProgressInfo", response);
-
             // await ctx.dispatch("connect");
-            // let userId = await viewContract.GetUserId(address).call({
-            //   from: address,
-            // });
-            // let places = [];
-            // for (let table = 1; table <= 16; table++) {
-            //   let position = await viewContract.methods
-            //     .GetTablePosition(userId)
-            //     .call({
-            //       from: address,
-            //     });
-            //   if (position[0] === 0) {
-            //     places.push(0);
-            //   } else {
-            //     places.push(position[0] / (position[1] / 100));
-            //   }
-            // }
-            // return places;
+
+            // Get address
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => (address = res[0]));
+
+            let userId;
+            await viewContract.methods
+                .GetUserId(address)
+                .call({
+                    from: address,
+                })
+                .then((res) => (userId = res ? res : null));
+
+            if (userId) {
+                let places = [];
+                for (let table = 1; table <= 16; table++) {
+                    await viewContract.methods
+                        .GetTablePosition(userId, address, table)
+                        .call({
+                            from: address,
+                        })
+                        .then((res) => {
+                            if (res[0] == 0) {
+                                places.push(0);
+                            } else {
+                                places.push(res[0] / (res[1] / 100));
+                            }
+                        });
+                }
+
+                ctx.commit("setProgressInfo", places);
+            }
         },
 
         /**
@@ -213,48 +287,49 @@ export default {
          * @returns {Object}
          */
         async getUserLevels(ctx) {
-            let results = [
-                [
-                    false,
-                    true,
-                    true,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                ],
-                [0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 10, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            ];
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => {
+                    address = res[0];
+                });
 
-            let response = {
-                activedTable: results[0],
-                tableInfo: {
-                    paymantCount: results[1],
-                    activedCount: results[2],
-                    paymant: results[3],
-                }
-            };
-            ctx.commit("setTableInfo", response);
             // await ctx.dispatch("connect");
-            // let userId = await viewContract.GetUserId(address).call({
-            //   from: address,
-            // });
-            // let levels = await viewContract.methods.GetUserLevels(userId).call({
-            //   from: address,
-            // });
-            // return levels;
+            let userId;
+            await viewContract.methods
+                .GetUserId(address)
+                .call({
+                    from: address,
+                })
+                .then((res) => (userId = res ? res : null));
+
+            if (userId) {
+                await viewContract.methods
+                    .GetUserLevels(userId)
+                    .call({
+                        from: address,
+                    })
+                    .then((res) => {
+                        let response = {
+                            activedTable: res[0],
+                            tableInfo: {
+                                paymantCount: res[1],
+                                activedCount: res[2],
+                                paymant: res[3],
+                            },
+                        };
+                        ctx.commit("setTableInfo", response);
+                    })
+                    .catch((err) => {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: err.message,
+                            env: err.stack,
+                        });
+                    });
+            }
         },
 
         /**
@@ -265,22 +340,32 @@ export default {
          * @returns {Object}
          */
         async getGlobalStat(ctx) {
-            let results = [10, 20, 30, 40, 50, 60];
-
-            let response = {
-                accountCount: results[0],
-                tableCount: results[1],
-                pullMoney: results[2],
-                tableMoney: results[3],
-                pullCount: results[4],
-                pullPaymant: results[5],
-            };
-            ctx.commit("setGlobalInfo", response);
             // await ctx.dispatch("connect");
-            // let stat = await viewContract.methods.GetGlobalStat().call({
-            //   from: address,
-            // });
-            // return stat;
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => {
+                    address = res[0];
+                });
+
+            await viewContract.methods
+                .GetGlobalInfo()
+                .call({
+                    from: address,
+                })
+                .then((res) => {
+                    let response = {
+                        accountCount: res[0],
+                        tableCount: res[1],
+                        pullMoney: res[2],
+                        tableMoney: web3.utils.fromWei(String(res[3]), "ether"),
+                        pullCount: res[4],
+                        pullPaymant: res[5],
+                    };
+                    ctx.commit("setGlobalInfo", response);
+                });
         },
 
         /**
@@ -291,21 +376,70 @@ export default {
          * @returns {Object}
          */
         async getIdByAddress(ctx) {
-            let response = {
-                id: 1
-            };
-            ctx.commit("setAccountId", response);
             // await ctx.dispatch("connect");
-            // let userId = await viewContract.methods.GetUserId(address).call({
-            //   from: address,
-            // });
-            // return userId;
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => {
+                    address = res[0];
+                });
+
+            await viewContract.methods
+                .GetUserId(address)
+                .call({
+                    from: address,
+                })
+                .then((res) => {
+                    let response = {
+                        id: res,
+                    };
+                    ctx.commit("setAccountId", response);
+                });
         },
 
+        async GetPullsInfo() {
+            // await ctx.dispatch("connect");
+            let address;
+            await window.ethereum
+                .request({
+                    method: "eth_requestAccounts",
+                })
+                .then((res) => {
+                    address = res[0];
+                });
 
-        // 
-        insertAddress(ctx, data) {
-            return ctx.commit("setAddress", data);
+            let pullCount;
+            await viewContract.methods
+                .GetPullCount()
+                .call({
+                    from: address,
+                })
+                .then((res) => {
+                    pullCount = res;
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+
+            let pullInfo = [];
+            for (let pull = 1; pull <= pullCount; pull++) {
+                let info;
+                await viewContract.methods
+                    .GetPullById(pull)
+                    .call({
+                        from: address,
+                    })
+                    .then((res) => {
+                        info = res;
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+                pullInfo.push(info);
+            }
+            return pullInfo;
         },
 
         /**
@@ -323,7 +457,7 @@ export default {
                 })
                 .catch((err) => {
                     err = err.response.data;
-                    ctx.commit("setAccountError", err.error);
+                    ctx.commit("setError", err.error);
                 });
         },
 
@@ -344,34 +478,64 @@ export default {
                     if (!err.response.data.status) ctx.commit("setAddress", data);
                 });
         },
-        clearAccountError(ctx) {
-            ctx.commit("setAccountError", {
+
+        clearAccountInfo(ctx) {
+            ctx.commit("clearAccountInfo");
+        },
+
+        clearError(ctx) {
+            ctx.commit("setError", {
                 msg: null,
                 name: null,
-                env: null
-            })
-        }
+                env: null,
+            });
+        },
+
+        clearResponse(ctx) {
+            ctx.commit("setSuccess", false);
+        },
+
+        activeTable(ctx, table) {
+            ctx.commit("setActiveTable", table);
+        },
+
+        //
+        insertAddress(ctx, data) {
+            return ctx.commit("setAddress", data);
+        },
     },
     mutations: {
         setError(state, data) {
-            state.contractError = data
+            state.error = data;
         },
-        setResponseStatus(state, data) {
-            state.contractError = data
+
+        setSuccess(state, data) {
+            state.response = data;
         },
+
         setTableInfo(state, data) {
             state.activedTable = data.activedTable;
-            state.cardData.forEach((_, idx) => {
-                state.cardData[idx].isActive = data.activedTable[idx];
-                state.cardData[idx].paymantCount = data.tableInfo.paymantCount[idx];
-                state.cardData[idx].activedCount = data.tableInfo.activedCount[idx];
-                state.cardData[idx].paymant = data.tableInfo.paymant[idx];
-
+            let tables = [];
+            state.cardPrice.forEach((item, idx) => {
+                let table = {
+                    lvl: idx + 1,
+                    price: item,
+                    paymantCount: parseInt(data.tableInfo.paymantCount[idx]),
+                    paymant: web3.utils.fromWei(data.tableInfo.paymant[idx]),
+                    activedCount: parseInt(data.tableInfo.activedCount[idx]),
+                    bonus: null,
+                    progress: null,
+                    isActive: data.activedTable[idx],
+                };
+                tables.push(table);
             });
+            state.cardData = tables;
         },
+
         setGlobalInfo(state, data) {
             state.globalInfo = data;
         },
+
         setProgressInfo(state, data) {
             state.cardData.forEach((item, idx) => {
                 item.progress = data[idx];
@@ -382,189 +546,61 @@ export default {
         setAccountInfo(state, data) {
             let info = {
                 ...state.accountInfo,
-                ...data
+                ...data,
             };
 
             state.accountInfo = info;
         },
+
+        clearAccountInfo(state) {
+            state.accountInfo = {
+                id: null,
+                webId: null,
+                address: null,
+                password: null,
+                date: null,
+                referalAddress: null,
+                referalCount: null,
+                paymant: {
+                    table: null,
+                    referal: null,
+                    pullDeposit: null,
+                    pull: null,
+                    pullReferal: null,
+                },
+            };
+        },
+
         setAccountId(state, data) {
             state.accountInfo.id = data;
         },
+
         setAddress(state, data) {
             state.accountInfo.address = data;
         },
-        setAccountError(state, data) {
-            state.accountError = data;
+
+        setActiveTable(state, data) {
+            state.cardData[data.lvl - 1].isActive = data.status;
         },
     },
     state: {
         cardData: [{
-                lvl: 1,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 2,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 3,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 4,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 5,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 6,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 7,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 8,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 9,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 10,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 11,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 12,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 13,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 14,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 15,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-            {
-                lvl: 16,
-                price: 0.04,
-                paymantCount: null,
-                paymant: null,
-                activedCount: null,
-                bonus: null,
-                progress: 0,
-                isActive: false,
-            },
-        ],
+            lvl: 0,
+            price: 0,
+            paymantCount: null,
+            paymant: null,
+            activedCount: null,
+            bonus: null,
+            progress: null,
+            isActive: false,
+        }, ],
+        cardPrice: [0.04, 0.07, 0.12, 0.2, 0.35, 0.6, 1.3, 2.1, 3.3, 4.7, 6, 8, 11, 14, 16, 20],
         accountInfo: {
             id: null,
+            webId: null,
             address: null,
             password: null,
             date: null,
-            referalId: null,
             referalAddress: null,
             referalCount: null,
             paymant: {
@@ -583,13 +619,12 @@ export default {
             pullCount: null,
             pullPaymant: null,
         },
-        contractError: null,
-        contractResponse: false,
-        accountError: {
+        error: {
             msg: null,
             name: null,
             env: null,
         },
+        response: null,
     },
     getters: {
         getContractInfo(state) {
@@ -598,8 +633,8 @@ export default {
         getAccountInfo(state) {
             return state.accountInfo;
         },
-        getAccountError(state) {
-            return state.accountError;
+        getError(state) {
+            return state.error;
         },
     },
 };
