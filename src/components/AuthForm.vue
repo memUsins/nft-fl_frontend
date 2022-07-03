@@ -51,7 +51,6 @@ export default {
       if (!this.getAccountInfo.address) return (this.loginError = true);
 
       let data = {
-        address: this.getAccountInfo.address,
         password: this.password,
         referalId: this.$route.query.referalId || 0,
       };

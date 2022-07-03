@@ -14,6 +14,7 @@
           v-for="(card, index) in getContractInfo.cardData"
           :key="index"
           :cardData="card"
+          :isLoading="cardLoading"
           @BUY-cardId="buyTableEvent"
           @REINVEST-cardId="reinvestCardEvent"
         ></Card>
@@ -21,13 +22,31 @@
           Стол был успешно куплен!
         </SuccessModal>
         <ErrorModal
-          v-if="getContractInfo.error.msg === 'Level already active'"
+          v-if="getError.msg === 'Level already active'"
           :propIsOpen="true"
         >
           Стол уже куплен!
         </ErrorModal>
         <ErrorModal
-          v-if="getContractInfo.error.msg === 'Not enoight token'"
+          v-if="getError.msg === 'User denied transaction signature'"
+          :propIsOpen="true"
+        >
+          Операция была отменена, покупка не произведена!
+        </ErrorModal>
+        <ErrorModal
+          v-if="getError.msg === 'Unknown account'"
+          :propIsOpen="true"
+        >
+          Неизвестный аккаунт! Пожалуйста, выберите другой аккаунт!
+        </ErrorModal>
+        <ErrorModal
+          v-if="getError.msg === 'All previous levels must be active'"
+          :propIsOpen="true"
+        >
+          Все предыдущие столы должны быть куплены!
+        </ErrorModal>
+        <ErrorModal
+          v-if="getError.msg === 'Not enoight token'"
           :propIsOpen="true"
         >
           Недостаточно средств для реинвеста!
@@ -52,25 +71,25 @@
         <ul class="block">
           <li class="item">
             <p>ID:</p>
-            <span>{{ getContractInfo.accountInfo.id }}</span>
+            <span>{{ getAccountInfo.id }}</span>
           </li>
           <li class="item">
             <p>referers:</p>
-            <span>{{ getContractInfo.accountInfo.referalCount }}</span>
+            <span>{{ getAccountInfo.referalCount }}</span>
           </li>
           <li class="item">
             <p>reward from tables:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.table }}</span>
+            <span>{{ getAccountInfo.paymant.table }}</span>
           </li>
           <li class="item">
             <p>reward from referers:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.referal }}</span>
+            <span>{{ getAccountInfo.paymant.referal }}</span>
           </li>
         </ul>
         <ul class="block">
           <li class="item">
             <p>reinvest value:</p>
-            <span>{{ getContractInfo.accountInfo.paymant.pullDeposit }}</span>
+            <span>{{ getAccountInfo.paymant.pullDeposit }}</span>
           </li>
           <li class="item">
             <p>общий онлайн:</p>
@@ -125,6 +144,12 @@
       />
     </div>
     <div class="loading overlay" v-show="isLoading">
+      <div class="loader">
+        <span class="a"></span>
+        <span class="b spin">
+          <span class="c"></span>
+        </span>
+      </div>
       Загрузка, пожалуйста, подождите..
     </div>
   </div>
@@ -143,6 +168,7 @@ export default {
   data() {
     return {
       isLoading: true,
+      cardLoading: true,
       referalLink: null,
       address: null,
     };
@@ -172,21 +198,19 @@ export default {
         referalId: this.getAccountInfo.referalId,
       };
       await this.$store.dispatch("buyTable", tableInfo);
-      if (!this.getError.msg) {
-        await this.$store.dispatch("getFullUserInfo", this.address);
-        await this.$store.dispatch("getUserLevels", this.address);
-        await this.$store.dispatch("getUserTableProgress", this.address);
-        await this.$store.dispatch("getGlobalStat", this.address);
-        await this.$store.dispatch("GetPullsInfo", this.address);
-      }
+      this.cardLoading = true;
+      if (!this.getError.msg) this.getData();
+      else this.cardLoading = false;
     },
 
     // Clicked
-    reinvestCardEvent(value) {
+    async reinvestCardEvent(value) {
       const tableInfo = {
         lvl: value.lvl,
       };
-      this.$store.dispatch("reinvest", tableInfo);
+      await this.$store.dispatch("reinvest", tableInfo);
+      this.cardLoading = true;
+      if (!this.getError.msg) this.getData();
     },
 
     // Copy
@@ -209,6 +233,7 @@ export default {
 
     // Init
     async init() {
+      this.cardLoading = true;
       this.isLoading = true;
 
       await window.ethereum
@@ -222,16 +247,20 @@ export default {
       await this.$store.dispatch("getAccountInfo", this.address);
       if (!this.getAccountInfo.password) this.$router.push({ name: "Home" });
 
+      this.getData();
+      // Create ref link
+      this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.address}`;
+    },
+
+    async getData() {
       await this.$store.dispatch("getFullUserInfo", this.address);
       await this.$store.dispatch("getUserLevels", this.address);
       await this.$store.dispatch("getUserTableProgress", this.address);
       await this.$store.dispatch("getGlobalStat", this.address);
       await this.$store.dispatch("GetPullsInfo", this.address);
       await this.activedTable();
-
       this.isLoading = false;
-      // Create ref link
-      this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.address}`;
+      this.cardLoading = false;
     },
   },
   updated() {

@@ -1,5 +1,10 @@
 <template>
-  <li class="card" :class="{ disabled: !cardData.isActive }">
+  <li
+    class="card"
+    :class="{
+      disabled: (cardData.isActive && isLoading) || !cardData.isActive,
+    }"
+  >
     <img
       :src="`img/planets/${cardData.lvl}.png`"
       alt="planet"
@@ -26,17 +31,20 @@
           <p>Выплаты с уровня:</p>
           <span>{{ cardData.paymant }}</span>
         </li>
-
-        <li class="item info">
-          <p>Бонус с партнёра:</p>
-          <span>{{ cardData.bonus }}</span>
-        </li>
       </ul>
       <div class="buttons">
         <button class="buy button" @click="Buy(cardData)">Купить</button>
         <button class="outline button" @click="Reinvest(cardData)">
           Реинвест
         </button>
+      </div>
+    </div>
+    <div class="loader_spinner" v-if="isLoading && cardData.isActive">
+      <div class="loader">
+        <span class="a"></span>
+        <span class="b spin">
+          <span class="c"></span>
+        </span>
       </div>
     </div>
   </li>
@@ -46,7 +54,7 @@
 import { mapGetters } from "vuex";
 export default {
   name: "card",
-  props: ["cardData"],
+  props: ["cardData", "isLoading"],
   computed: { ...mapGetters(["getContractInfo"]) },
   methods: {
     Buy(id) {

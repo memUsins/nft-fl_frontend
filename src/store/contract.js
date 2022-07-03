@@ -1,10 +1,12 @@
-import contractABI from "./../contract/contractABI.js";
 import axios from "axios";
 import Web3 from "web3";
-const web3 = new Web3("http://localhost:8545");
+const web3 = new Web3(window.ethereum);
 
 // Default gas
 const gasBuy = 900000;
+
+// Contracts
+import contractABI from "./../contract/contractABI.js";
 const viewContract = new web3.eth.Contract(contractABI.viewAbi, process.env.VUE_APP_VIEW_ADDRESS);
 const matrixContract = new web3.eth.Contract(contractABI.matrixAbi, process.env.VUE_APP_MATRIX_ADDRESS);
 const reinvestContract = new web3.eth.Contract(contractABI.reinvestAbi, process.env.VUE_APP_REINVEST_ADDRESS);
@@ -55,13 +57,13 @@ export default {
          * @returns {Object}
          */
         async buyTable(ctx, data) {
+            await ctx.dispatch("connect");
+
             // Get address
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => (address = res[0]));
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             let price = String(data.price);
 
@@ -88,6 +90,24 @@ export default {
                             msg: "Level already active",
                             env: err.stack,
                         });
+                    } else if (err.message.indexOf("unknown account") !== -1) {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: "Unknown account",
+                            env: err.stack,
+                        });
+                    } else if (err.message.indexOf("All previous levels must be active") !== -1) {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: "All previous levels must be active",
+                            env: err.stack,
+                        });
+                    } else if (err.message.indexOf("User denied transaction signature") !== -1) {
+                        ctx.commit("setError", {
+                            name: err.name,
+                            msg: "User denied transaction signature",
+                            env: err.stack,
+                        });
                     } else {
                         ctx.commit("setError", {
                             name: err.name,
@@ -95,6 +115,7 @@ export default {
                             env: err.stack,
                         });
                     }
+                    console.log(err);
                 });
         },
 
@@ -108,13 +129,13 @@ export default {
          * @returns {Object}
          */
         async pullReward(ctx, pullId, sum) {
+            await ctx.dispatch("connect");
+
             // Get address
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => (address = res[0]));
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             let data = {
                 from: address,
@@ -146,13 +167,13 @@ export default {
          * @returns {Object}
          */
         async reinvest(ctx, table) {
+            await ctx.dispatch("connect");
+
             // Get address
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => (address = res[0]));
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             let data = {
                 from: address,
@@ -198,15 +219,12 @@ export default {
          * @returns {Object}
          */
         async getFullUserInfo(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
-            // Get address
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => (address = res[0]));
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             await viewContract.methods
                 .GetFullUserInfo(address)
@@ -240,15 +258,12 @@ export default {
          * @returns {Array}
          */
         async getUserTableProgress(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
-            // Get address
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => (address = res[0]));
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             let userId;
             await viewContract.methods
@@ -287,16 +302,13 @@ export default {
          * @returns {Object}
          */
         async getUserLevels(ctx) {
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => {
-                    address = res[0];
-                });
+            await ctx.dispatch("connect");
 
-            // await ctx.dispatch("connect");
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
+
             let userId;
             await viewContract.methods
                 .GetUserId(address)
@@ -340,8 +352,12 @@ export default {
          * @returns {Object}
          */
         async getGlobalStat(ctx) {
-            // await ctx.dispatch("connect");
-            let address;
+            await ctx.dispatch("connect");
+
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
             await window.ethereum
                 .request({
                     method: "eth_requestAccounts",
@@ -368,47 +384,13 @@ export default {
                 });
         },
 
-        /**
-         * getIdByAddress
-         *
-         * @param {string} address account address
-         *
-         * @returns {Object}
-         */
-        async getIdByAddress(ctx) {
-            // await ctx.dispatch("connect");
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => {
-                    address = res[0];
-                });
+        async GetPullsInfo(ctx) {
+            await ctx.dispatch("connect");
 
-            await viewContract.methods
-                .GetUserId(address)
-                .call({
-                    from: address,
-                })
-                .then((res) => {
-                    let response = {
-                        id: res,
-                    };
-                    ctx.commit("setAccountId", response);
-                });
-        },
-
-        async GetPullsInfo() {
-            // await ctx.dispatch("connect");
-            let address;
-            await window.ethereum
-                .request({
-                    method: "eth_requestAccounts",
-                })
-                .then((res) => {
-                    address = res[0];
-                });
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
 
             let pullCount;
             await viewContract.methods
@@ -450,15 +432,26 @@ export default {
          * @returns {Object}
          */
         async register(ctx, data) {
-            await axios
-                .post(`${process.env.VUE_APP_API}account/create`, data)
-                .then((res) => {
-                    if (res.data.status) ctx.commit("setAccountInfo", res.data.data);
-                })
-                .catch((err) => {
-                    err = err.response.data;
-                    ctx.commit("setError", err.error);
+            let address = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            address = address[0];
+
+            let userId = data.referalId || 0;
+            if (data.referalId) {
+                userId = await viewContract.methods.GetUserId(data.referalId).call({
+                    from: address,
                 });
+            }
+
+            await axios
+                .post(`${process.env.VUE_APP_API}account/create`, {
+                    address: address,
+                    password: data.password,
+                    referalId: userId,
+                })
+                .then((res) => ctx.commit("setAccountInfo", res.data.data))
+                .catch((err) => ctx.commit("setError", err.response.data.error));
         },
 
         /**
@@ -520,9 +513,9 @@ export default {
                 let table = {
                     lvl: idx + 1,
                     price: item,
-                    paymantCount: parseInt(data.tableInfo.paymantCount[idx]),
-                    paymant: web3.utils.fromWei(data.tableInfo.paymant[idx]),
-                    activedCount: parseInt(data.tableInfo.activedCount[idx]),
+                    paymantCount: parseInt(data.tableInfo.paymantCount[idx + 1]),
+                    paymant: web3.utils.fromWei(data.tableInfo.paymant[idx + 1]),
+                    activedCount: parseInt(data.tableInfo.activedCount[idx + 1]),
                     bonus: null,
                     progress: null,
                     isActive: data.activedTable[idx],
