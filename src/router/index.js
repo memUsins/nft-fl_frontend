@@ -8,7 +8,8 @@ const routes = [{
     path: '/',
     name: 'Home',
     meta: {
-      layout: "main"
+      layout: "main",
+      title: "Главная страница | Unique"
     },
     component: Home
   },
@@ -16,7 +17,8 @@ const routes = [{
     path: '/levels',
     name: 'Levels',
     meta: {
-      layout: "main"
+      layout: "main",
+      title: "Биржа | Unique"
     },
     component: () => import('../views/Levels.vue')
   }

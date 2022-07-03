@@ -173,6 +173,9 @@ export default {
       address: null,
     };
   },
+  created() {
+    document.title = this.$route.meta.title;
+  },
   computed: {
     ...mapGetters(["getAccountInfo", "getContractInfo", "getError"]),
   },
@@ -197,7 +200,9 @@ export default {
         price: value.price,
         referalId: this.getAccountInfo.referalId,
       };
+
       await this.$store.dispatch("buyTable", tableInfo);
+
       this.cardLoading = true;
       if (!this.getError.msg) this.getData();
       else this.cardLoading = false;
@@ -208,14 +213,18 @@ export default {
       const tableInfo = {
         lvl: value.lvl,
       };
+
       await this.$store.dispatch("reinvest", tableInfo);
+
       this.cardLoading = true;
       if (!this.getError.msg) this.getData();
+      else this.cardLoading = false;
     },
 
     // Copy
     copyReferal() {
       document.querySelector("#referalLink").select();
+
       try {
         document.execCommand("copy");
         alert("Ссылка успешно скопирована!");
@@ -226,6 +235,7 @@ export default {
 
     activedTable() {
       let tables = this.getContractInfo.cardData;
+
       if (!tables[0].isActived) {
         this.$store.dispatch("activeTable", { lvl: 1, status: true });
       }
@@ -245,6 +255,7 @@ export default {
 
       await this.$store.dispatch("clearAccountInfo");
       await this.$store.dispatch("getAccountInfo", this.address);
+
       if (!this.getAccountInfo.password) this.$router.push({ name: "Home" });
 
       this.getData();
@@ -259,12 +270,10 @@ export default {
       await this.$store.dispatch("getGlobalStat", this.address);
       await this.$store.dispatch("GetPullsInfo", this.address);
       await this.activedTable();
+
       this.isLoading = false;
       this.cardLoading = false;
     },
-  },
-  updated() {
-    // this.init(this.getAccountInfo.address);
   },
 };
 </script>
