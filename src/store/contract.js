@@ -309,13 +309,13 @@ export default {
             });
             address = address[0];
 
-            let userId;
-            await viewContract.methods
+            let userId = await viewContract.methods
                 .GetUserId(address)
                 .call({
                     from: address,
                 })
-                .then((res) => (userId = res ? res : null));
+                .then(res => res)
+                .catch(() => null);
 
             if (userId) {
                 await viewContract.methods
@@ -472,6 +472,20 @@ export default {
                 });
         },
 
+        /**
+         * getAccountInfo
+         *
+         * @param {Object} data address refCount tableCount
+         *
+         * @returns {Object}
+         */
+        async checkPassCount(data) {
+            await axios
+                .get(`${process.env.VUE_APP_API}password/checkCount`, data)
+        },
+
+
+
         clearAccountInfo(ctx) {
             ctx.commit("clearAccountInfo");
         },
@@ -492,7 +506,6 @@ export default {
             ctx.commit("setActiveTable", table);
         },
 
-        //
         insertAddress(ctx, data) {
             return ctx.commit("setAddress", data);
         },
@@ -523,6 +536,9 @@ export default {
                 tables.push(table);
             });
             state.cardData = tables;
+
+            let activeTableCount = data.activedTable.find(table => table === true).length;
+            state.tableCount = activeTableCount;
         },
 
         setGlobalInfo(state, data) {
@@ -586,7 +602,7 @@ export default {
             bonus: null,
             progress: null,
             isActive: false,
-        }, ],
+        }],
         cardPrice: [0.04, 0.07, 0.12, 0.2, 0.35, 0.6, 1.3, 2.1, 3.3, 4.7, 6, 8, 11, 14, 16, 20],
         accountInfo: {
             id: null,
@@ -596,6 +612,7 @@ export default {
             date: null,
             referalAddress: null,
             referalCount: null,
+            tableCount: null,
             paymant: {
                 table: null,
                 referal: null,

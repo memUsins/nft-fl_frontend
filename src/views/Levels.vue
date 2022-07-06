@@ -266,6 +266,11 @@ export default {
     async getData() {
       await this.$store.dispatch("getFullUserInfo", this.address);
       await this.$store.dispatch("getUserLevels", this.address);
+      await this.$store.dispatch("checkPassCount", {
+        address: this.address,
+        refCount: this.getAccountInfo.referalCount,
+        tableCount: this.getAccountInfo.tableCount,
+      });
       await this.$store.dispatch("getUserTableProgress", this.address);
       await this.$store.dispatch("getGlobalStat", this.address);
       await this.$store.dispatch("GetPullsInfo", this.address);
