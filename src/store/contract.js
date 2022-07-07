@@ -57,7 +57,7 @@ export default {
          * @returns {Object}
          */
         async buyTable(ctx, data) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -129,7 +129,7 @@ export default {
          * @returns {Object}
          */
         async pullReward(ctx, pullId, sum) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -167,7 +167,7 @@ export default {
          * @returns {Object}
          */
         async reinvest(ctx, table) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -219,7 +219,7 @@ export default {
          * @returns {Object}
          */
         async getFullUserInfo(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -267,7 +267,7 @@ export default {
          * @returns {Array}
          */
         async getUserTableProgress(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -311,7 +311,7 @@ export default {
          * @returns {Object}
          */
         async getUserLevels(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -361,7 +361,7 @@ export default {
          * @returns {Object}
          */
         async getGlobalStat(ctx) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -393,8 +393,8 @@ export default {
                 });
         },
 
-        async GetPullsInfo() {
-            // await ctx.dispatch("connect");
+        async GetPullsInfo(ctx) {
+            await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -441,7 +441,7 @@ export default {
          * @returns {Object}
          */
         async register(ctx, data) {
-            // await ctx.dispatch("connect");
+            await ctx.dispatch("connect");
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
