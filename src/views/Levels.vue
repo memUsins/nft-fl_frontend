@@ -268,7 +268,7 @@ export default {
       await this.$store.dispatch("getUserLevels", this.address);
       await this.$store.dispatch("checkPassCount", {
         address: this.address,
-        refCount: this.getAccountInfo.referalCount,
+        refCount: parseInt(this.getAccountInfo.referalCount),
         tableCount: this.getAccountInfo.tableCount,
       });
       await this.$store.dispatch("getUserTableProgress", this.address);

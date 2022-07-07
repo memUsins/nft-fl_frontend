@@ -21,6 +21,9 @@
     <errorModal v-if="getError.name == 'PASSWORD_USED'" propIsOpen="true">
       Данный пароль уже активирован
     </errorModal>
+    <errorModal v-if="getError.name == 'PASSWORD_NOT_FOUND'" propIsOpen="true">
+      Такого пароля не существует
+    </errorModal>
   </form>
 </template>
 
@@ -56,14 +59,7 @@ export default {
       };
 
       this.$store.dispatch("register", data);
-    },
-  },
-  watch: {
-    getError() {
-      if (this.getError.name == "ADDRESS_USED") {
-        this.$store.dispatch("getAccountInfo", this.getAccountInfo.address);
-        if (this.getAccountInfo.password) this.$router.push({ name: "Levels" });
-      }
+      if (this.getAccountInfo.id) this.$router.push({ name: "Levels" });
     },
   },
 };

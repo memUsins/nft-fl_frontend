@@ -10,6 +10,8 @@ import contractABI from "./../contract/contractABI.js";
 const viewContract = new web3.eth.Contract(contractABI.viewAbi, process.env.VUE_APP_VIEW_ADDRESS);
 const matrixContract = new web3.eth.Contract(contractABI.matrixAbi, process.env.VUE_APP_MATRIX_ADDRESS);
 const reinvestContract = new web3.eth.Contract(contractABI.reinvestAbi, process.env.VUE_APP_REINVEST_ADDRESS);
+console.log(contractABI.reinvestAbi);
+
 
 export default {
     actions: {
@@ -57,7 +59,7 @@ export default {
          * @returns {Object}
          */
         async buyTable(ctx, data) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -129,7 +131,7 @@ export default {
          * @returns {Object}
          */
         async pullReward(ctx, pullId, sum) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -167,7 +169,7 @@ export default {
          * @returns {Object}
          */
         async reinvest(ctx, table) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -219,7 +221,7 @@ export default {
          * @returns {Object}
          */
         async getFullUserInfo(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -258,7 +260,7 @@ export default {
          * @returns {Array}
          */
         async getUserTableProgress(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -302,7 +304,7 @@ export default {
          * @returns {Object}
          */
         async getUserLevels(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -352,7 +354,7 @@ export default {
          * @returns {Object}
          */
         async getGlobalStat(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -384,8 +386,8 @@ export default {
                 });
         },
 
-        async GetPullsInfo(ctx) {
-            await ctx.dispatch("connect");
+        async GetPullsInfo() {
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -438,10 +440,15 @@ export default {
             address = address[0];
 
             let userId = data.referalId || 0;
+            console.log(data.referalId);
+
             if (data.referalId) {
-                userId = await viewContract.methods.GetUserId(data.referalId).call({
-                    from: address,
-                });
+                let referalInfo = await axios.get(`${process.env.VUE_APP_API}account/${userId}`).catch(() => console.log("ref don't found"));
+                if (referalInfo) {
+                    userId = await viewContract.methods.GetUserId(data.referalId).call({
+                        from: address,
+                    });
+                } else userId = 0;
             }
 
             await axios
@@ -473,15 +480,16 @@ export default {
         },
 
         /**
-         * getAccountInfo
+         * checkPassCount
          *
          * @param {Object} data address refCount tableCount
          *
          * @returns {Object}
          */
-        async checkPassCount(data) {
+        async checkPassCount(ctx, data) {
             await axios
-                .get(`${process.env.VUE_APP_API}password/checkCount`, data)
+                .post(`${process.env.VUE_APP_API}password/checkCount`, data)
+                .catch((err) => ctx.commit("setError", err.response.data.error));
         },
 
 
@@ -537,8 +545,8 @@ export default {
             });
             state.cardData = tables;
 
-            let activeTableCount = data.activedTable.find(table => table === true).length;
-            state.tableCount = activeTableCount;
+            let activeTableCount = data.activedTable.find(table => table);
+            state.accountInfo.tableCount = activeTableCount || 0;
         },
 
         setGlobalInfo(state, data) {
