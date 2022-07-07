@@ -24,6 +24,12 @@
     <errorModal v-if="getError.name == 'PASSWORD_NOT_FOUND'" propIsOpen="true">
       Такого пароля не существует
     </errorModal>
+    <errorModal
+      v-if="getError.msg == 'User denied transaction signature'"
+      propIsOpen="true"
+    >
+      Регистрация была отменена
+    </errorModal>
   </form>
 </template>
 

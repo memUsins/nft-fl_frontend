@@ -10,8 +10,6 @@ import contractABI from "./../contract/contractABI.js";
 const viewContract = new web3.eth.Contract(contractABI.viewAbi, process.env.VUE_APP_VIEW_ADDRESS);
 const matrixContract = new web3.eth.Contract(contractABI.matrixAbi, process.env.VUE_APP_MATRIX_ADDRESS);
 const reinvestContract = new web3.eth.Contract(contractABI.reinvestAbi, process.env.VUE_APP_REINVEST_ADDRESS);
-console.log(contractABI.reinvestAbi);
-
 
 export default {
     actions: {
@@ -59,7 +57,7 @@ export default {
          * @returns {Object}
          */
         async buyTable(ctx, data) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -131,7 +129,7 @@ export default {
          * @returns {Object}
          */
         async pullReward(ctx, pullId, sum) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -169,7 +167,7 @@ export default {
          * @returns {Object}
          */
         async reinvest(ctx, table) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             // Get address
             let address = await window.ethereum.request({
@@ -221,12 +219,20 @@ export default {
          * @returns {Object}
          */
         async getFullUserInfo(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             address = address[0];
+
+            let userId = await viewContract.methods
+                .GetUserId(address)
+                .call({
+                    from: address,
+                })
+                .then((res) => res)
+                .catch(() => null)
 
             await viewContract.methods
                 .GetFullUserInfo(address)
@@ -234,8 +240,9 @@ export default {
                     from: address,
                 })
                 .then((res) => {
+                    console.log(res);
                     let response = {
-                        webId: res[0],
+                        webId: userId,
                         referalAddress: res[1],
                         referalCount: res[2],
                         paymant: {
@@ -260,20 +267,20 @@ export default {
          * @returns {Array}
          */
         async getUserTableProgress(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             address = address[0];
 
-            let userId;
-            await viewContract.methods
+            let userId = await viewContract.methods
                 .GetUserId(address)
                 .call({
                     from: address,
                 })
-                .then((res) => (userId = res ? res : null));
+                .then((res) => res)
+                .catch(() => null)
 
             if (userId) {
                 let places = [];
@@ -304,7 +311,7 @@ export default {
          * @returns {Object}
          */
         async getUserLevels(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -354,7 +361,7 @@ export default {
          * @returns {Object}
          */
         async getGlobalStat(ctx) {
-            await ctx.dispatch("connect");
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -386,8 +393,8 @@ export default {
                 });
         },
 
-        async GetPullsInfo(ctx) {
-            await ctx.dispatch("connect");
+        async GetPullsInfo() {
+            // await ctx.dispatch("connect");
 
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -434,31 +441,67 @@ export default {
          * @returns {Object}
          */
         async register(ctx, data) {
+            // await ctx.dispatch("connect");
             let address = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             address = address[0];
 
             let userId = data.referalId || 0;
-            console.log(data.referalId);
+            let isError = false;
 
             if (data.referalId) {
-                let referalInfo = await axios.get(`${process.env.VUE_APP_API}account/${userId}`).catch(() => console.log("ref don't found"));
+                let referalInfo = await axios
+                    .get(`${process.env.VUE_APP_API}account/${userId}`)
+                    .then(res => res)
+                    .catch(() => console.log("ref don't found"));
+
                 if (referalInfo) {
-                    userId = await viewContract.methods.GetUserId(data.referalId).call({
-                        from: address,
-                    });
+                    userId = await viewContract.methods
+                        .GetUserId(data.referalId)
+                        .call({
+                            from: address,
+                        });
+
+                    await matrixContract.methods
+                        .registerWithReferrer(userId)
+                        .send({
+                            from: address,
+                            value: 0,
+                            gas: 250000,
+                        })
+                        .then(res => console.log(res))
+                        .catch(err => {
+                            if (err.message.indexOf("User denied transaction signature") !== -1) {
+                                ctx.commit("setError", {
+                                    name: err.name,
+                                    msg: "User denied transaction signature",
+                                    env: err.stack,
+                                });
+                            } else {
+                                ctx.commit("setError", {
+                                    name: err.name,
+                                    msg: err.message,
+                                    env: err.stack,
+                                });
+                            }
+                            isError = true;
+                        })
                 } else userId = 0;
             }
 
-            await axios
-                .post(`${process.env.VUE_APP_API}account/create`, {
+            if (!isError) {
+                let accountData = {
                     address: address,
                     password: data.password,
                     referalId: userId,
-                })
-                .then((res) => ctx.commit("setAccountInfo", res.data.data))
-                .catch((err) => ctx.commit("setError", err.response.data.error));
+                };
+
+                await axios
+                    .post(`${process.env.VUE_APP_API}account/create`, accountData)
+                    .then((res) => ctx.commit("setAccountInfo", res.data.data))
+                    .catch((err) => ctx.commit("setError", err.response.data.error));
+            }
         },
 
         /**
@@ -545,8 +588,11 @@ export default {
             });
             state.cardData = tables;
 
-            let activeTableCount = data.activedTable.find(table => table);
-            state.accountInfo.tableCount = activeTableCount || 0;
+            let tempTables = []
+            data.activedTable.forEach((item) => {
+                if (item) tempTables.push(item)
+            })
+            state.accountInfo.tableCount = tempTables.length || 0;
         },
 
         setGlobalInfo(state, data) {
@@ -653,6 +699,9 @@ export default {
         },
         getError(state) {
             return state.error;
+        },
+        getResponse(state) {
+            return state.response;
         },
     },
 };

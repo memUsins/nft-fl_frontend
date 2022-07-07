@@ -18,7 +18,7 @@
           @BUY-cardId="buyTableEvent"
           @REINVEST-cardId="reinvestCardEvent"
         ></Card>
-        <SuccessModal :propIsOpen="getContractInfo.contractResponse">
+        <SuccessModal :propIsOpen="true" v-if="getResponse">
           Стол был успешно куплен!
         </SuccessModal>
         <ErrorModal
@@ -177,7 +177,12 @@ export default {
     document.title = this.$route.meta.title;
   },
   computed: {
-    ...mapGetters(["getAccountInfo", "getContractInfo", "getError"]),
+    ...mapGetters([
+      "getAccountInfo",
+      "getContractInfo",
+      "getError",
+      "getResponse",
+    ]),
   },
   mounted() {
     if (typeof window.ethereum === "undefined")

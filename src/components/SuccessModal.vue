@@ -18,7 +18,7 @@ export default {
   methods: {
     closeModal() {
       this.isOpen = false;
-      this.$store.dispatch("clearSuccess");
+      this.$store.dispatch("clearResponse");
     },
   },
 };
