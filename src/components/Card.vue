@@ -14,7 +14,7 @@
       <ul class="list">
         <li class="item level-info">
           <span class="level">{{ cardData.lvl }} lvl</span>
-          <span class="price">{{ cardData.price }} ETH</span>
+          <span class="price">{{ cardData.price }} BNB</span>
         </li>
         <div class="line">
           <div
