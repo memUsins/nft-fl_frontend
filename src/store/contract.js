@@ -541,6 +541,10 @@ export default {
             ctx.commit("clearAccountInfo");
         },
 
+        setError(ctx, data) {
+            ctx.commit("setError", data);
+        },
+
         clearError(ctx) {
             ctx.commit("setError", {
                 msg: null,
@@ -577,16 +581,16 @@ export default {
                 let table = {
                     lvl: idx + 1,
                     price: item,
-                    paymantCount: parseInt(data.tableInfo.paymantCount[idx + 1]),
-                    paymant: web3.utils.fromWei(data.tableInfo.paymant[idx + 1]),
-                    activedCount: parseInt(data.tableInfo.activedCount[idx + 1]),
+                    paymantCount: parseInt(data.tableInfo.paymantCount[idx]),
+                    paymant: web3.utils.fromWei(data.tableInfo.paymant[idx]),
+                    activedCount: parseInt(data.tableInfo.activedCount[idx]),
                     bonus: null,
                     progress: null,
                     isActive: data.activedTable[idx],
                 };
                 tables.push(table);
             });
-            state.cardData = tables;
+            state.cards = tables;
 
             let tempTables = []
             data.activedTable.forEach((item) => {
@@ -600,7 +604,7 @@ export default {
         },
 
         setProgressInfo(state, data) {
-            state.cardData.forEach((item, idx) => {
+            state.cards.forEach((item, idx) => {
                 item.progress = data[idx];
             });
         },
@@ -643,11 +647,14 @@ export default {
         },
 
         setActiveTable(state, data) {
-            state.cardData[data.lvl - 1].isActive = data.status;
+            state.cards[data.lvl - 1].isActive = data.status;
+            let activedTable = [...state.activedTable];
+            activedTable[data.lvl - 1] = data.status;
+            state.activedTable = activedTable;
         },
     },
     state: {
-        cardData: [{
+        cards: [{
             lvl: 0,
             price: 0,
             paymantCount: null,
@@ -683,6 +690,7 @@ export default {
             pullCount: null,
             pullPaymant: null,
         },
+        activedTable: [],
         error: {
             msg: null,
             name: null,

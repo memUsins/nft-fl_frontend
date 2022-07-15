@@ -11,9 +11,9 @@
       <ul class="list levels">
         <Card
           class="level-item"
-          v-for="(card, index) in getContractInfo.cardData"
+          v-for="(card, index) in getContractInfo.cards"
           :key="index"
-          :cardData="card"
+          :cards="card"
           :isLoading="cardLoading"
           @BUY-cardId="buyTableEvent"
           @REINVEST-cardId="reinvestCardEvent"
@@ -200,6 +200,17 @@ export default {
   methods: {
     // Clicked
     async buyTableEvent(value) {
+      console.log(value.isActive);
+      console.log(this.getContractInfo.cards[value.lvl - 1].isActive);
+      if (value.isActive && this.getContractInfo.cards[value.lvl].isActive) {
+        this.$store.dispatch("setError", {
+          msg: "Level already active",
+          name: "Level already active",
+          env: "Chain",
+        });
+        return;
+      }
+
       const tableInfo = {
         lvl: value.lvl,
         price: value.price,
@@ -239,7 +250,7 @@ export default {
     },
 
     activedTable() {
-      let tables = this.getContractInfo.cardData;
+      let tables = this.getContractInfo.cards;
 
       if (!tables[0].isActived) {
         this.$store.dispatch("activeTable", { lvl: 1, status: true });
@@ -271,15 +282,16 @@ export default {
     async getData() {
       await this.$store.dispatch("getFullUserInfo", this.address);
       await this.$store.dispatch("getUserLevels", this.address);
+      await this.$store.dispatch("getUserTableProgress", this.address);
+      await this.$store.dispatch("getGlobalStat", this.address);
+      await this.$store.dispatch("GetPullsInfo", this.address);
+      await this.activedTable();
+
       await this.$store.dispatch("checkPassCount", {
         address: this.address,
         refCount: parseInt(this.getAccountInfo.referalCount),
         tableCount: this.getAccountInfo.tableCount,
       });
-      await this.$store.dispatch("getUserTableProgress", this.address);
-      await this.$store.dispatch("getGlobalStat", this.address);
-      await this.$store.dispatch("GetPullsInfo", this.address);
-      await this.activedTable();
 
       this.isLoading = false;
       this.cardLoading = false;
