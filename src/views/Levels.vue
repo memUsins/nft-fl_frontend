@@ -55,12 +55,12 @@
 
       <!-- Background -->
       <img
-        src="img/screens/7.png"
+        src="img/screens/7.webp"
         alt="bg"
         class="background background_first"
       />
       <img
-        src="img/screens/8.png"
+        src="img/screens/8.webp"
         alt="bg"
         class="background background_second"
       />
@@ -133,12 +133,12 @@
       </div>
       <!-- Float picture -->
       <div class="float ufo">
-        <img src="img/screens/ufo.png" alt="ufo" class="img" />
+        <img src="img/screens/ufo.webp" alt="ufo" class="img" />
         <div class="bg"></div>
       </div>
       <!-- Background -->
       <img
-        src="img/screens/9.png"
+        src="img/screens/9.webp"
         alt="bg"
         class="background background_first"
       />

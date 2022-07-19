@@ -13,7 +13,7 @@
       <AuthForm></AuthForm>
       <!-- Background -->
       <img
-        src="img/screens/1.png"
+        src="img/screens/1.webp"
         alt="bg"
         class="background background_first"
       />
@@ -46,12 +46,12 @@
       </div>
       <!-- Float picture -->
       <div class="float ufo">
-        <img src="img/screens/ufo.png" alt="ufo" class="img" />
+        <img src="img/screens/ufo.webp" alt="ufo" class="img" />
         <div class="bg"></div>
       </div>
       <!-- Background -->
       <img
-        src="img/screens/2.png"
+        src="img/screens/2.webp"
         alt="bg"
         class="background background_second"
       />
@@ -102,12 +102,12 @@
       </div>
       <!-- Float picture -->
       <div class="float rocket">
-        <img src="img/screens/rocket.png" alt="rocket" class="img" />
+        <img src="img/screens/rocket.webp" alt="rocket" class="img" />
         <div class="bg"></div>
       </div>
       <!-- Background -->
       <img
-        src="img/screens/3.png"
+        src="img/screens/3.webp"
         alt="bg"
         class="background background_third"
       />
@@ -170,7 +170,7 @@
       </div>
       <!-- Background -->
       <img
-        src="/img/screens/4.png"
+        src="/img/screens/4.webp"
         alt="bg"
         class="background background_fourth"
       />
@@ -219,7 +219,7 @@
       </div>
       <!-- Background -->
       <img
-        src="img/screens/5.png"
+        src="img/screens/5.webp"
         alt="bg"
         class="background background_fifth"
       />
@@ -269,12 +269,12 @@
       </div>
       <!-- Float picture -->
       <div class="float planet">
-        <img src="img/screens/planet.png" alt="planet" class="img" />
+        <img src="img/screens/planet.webp" alt="planet" class="img" />
         <div class="bg"></div>
       </div>
       <!-- Background -->
       <img
-        src="img/screens/6.png"
+        src="img/screens/6.webp"
         alt="bg"
         class="background background_sixth"
       />

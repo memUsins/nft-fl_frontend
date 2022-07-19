@@ -6,7 +6,7 @@
     }"
   >
     <img
-      :src="`img/planets/${cards.lvl}.png`"
+      :src="`img/planets/${cards.lvl}.webp`"
       alt="planet"
       class="card-planet float"
     />
