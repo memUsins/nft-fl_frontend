@@ -1,9 +1,12 @@
 <template>
-  <router-view/>
+  <div>
+    Promo
+  </div>
 </template>
 
 <script>
 export default {
-  name: "main-layout",
-};
+  name: "Promo",
+
+}
 </script>

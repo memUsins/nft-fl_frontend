@@ -1,15 +1,11 @@
 <template>
   <li
-    class="card"
-    :class="{
+      class="card"
+      :class="{
       disabled: (cards.isActive && isLoading) || !cards.isActive,
     }"
   >
-    <img
-      :src="`img/planets/${cards.lvl}.webp`"
-      alt="planet"
-      class="card-planet float"
-    />
+    <img :src="`img/planets/${cards.lvl}.webp`" alt="planet" class="card-planet float"/>
     <div class="content block block_bg">
       <ul class="list">
         <li class="item level-info">
@@ -17,25 +13,24 @@
           <span class="price">{{ cards.price }} BNB</span>
         </li>
         <div class="line">
-          <div
-            class="progress"
-            :style="`right: ${Progress(cards.progress)}%`"
-          ></div>
+          <div class="progress" :style="`right: ${Progress(cards.progress)}%`"></div>
         </div>
         <li class="item info">
-          <p>Кругов осталось:</p>
+          <p>{{ $t("pullCount") }}:</p>
           <span>{{ cards.paymantCount }}</span>
         </li>
 
         <li class="item info">
-          <p>Выплаты с уровня:</p>
+          <p>{{ $t("levelPaymant") }}:</p>
           <span>{{ cards.paymant }}</span>
         </li>
       </ul>
       <div class="buttons">
-        <button class="buy button" @click="Buy(cards)">Купить</button>
+        <button class="buy button" @click="Buy(cards)">
+          {{ $t("buy") }}
+        </button>
         <button class="outline button" @click="Reinvest(cards)">
-          Реинвест
+          {{ $t("reinvest") }}
         </button>
       </div>
     </div>
@@ -51,11 +46,12 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
+
 export default {
   name: "card",
   props: ["cards", "isLoading"],
-  computed: { ...mapGetters(["getContractInfo"]) },
+  computed: {...mapGetters(["getContractInfo"])},
   methods: {
     Buy(id) {
       return this.$emit("BUY-cardId", id);

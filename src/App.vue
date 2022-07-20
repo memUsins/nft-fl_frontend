@@ -1,42 +1,36 @@
 <template>
   <component :is="layout">
-    <router-view />
+    <router-view/>
   </component>
 </template>
 
 <script>
 import EmptyLayout from "./layouts/EmptyLayout.vue";
 import MainLayout from "./layouts/MainLayout.vue";
-import { mapGetters } from "vuex";
+import Cookies from "js-cookie";
 
 export default {
   name: "home",
   mounted() {
     if (window.ethereum) {
-      window.ethereum.request({ method: "eth_requestAccounts" }).then((res) => {
-        this.$store.dispatch("getAccountInfo", res[0]);
-        this.redirect();
+      window.ethereum.request({method: "eth_requestAccounts"}).then(async (res) => {
+        await this.$store.dispatch("getAccountInfo", res[0]);
       });
     }
+
+    if (Cookies.get("isAgree")) this.$store.dispatch("setAgree", true);
   },
   computed: {
-    ...mapGetters(["getAccountInfo"]),
     layout() {
       return (this.$route.meta.layout || "empty") + "-layout";
     },
   },
-  methods: {
-    redirect() {
-      if (this.getAccountInfo.id) this.$router.push({ name: "Levels" });
-      // if (this.getAccountInfo.password) console.log("redirect");
-    },
-  },
+  components: {EmptyLayout, MainLayout},
   watch: {
-    getAccountInfo() {
-      this.redirect();
+    "$i18n.locale": function (newVal) {
+      localStorage.setItem("last-locale", newVal);
     },
   },
-  components: { EmptyLayout, MainLayout },
 };
 </script>
 

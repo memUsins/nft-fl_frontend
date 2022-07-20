@@ -1,69 +1,42 @@
 <template>
   <!-- Main container -->
   <div class="container container_main levelspage">
+    <div class="locale-header">
+      <localePicker />
+    </div>
+
     <!-- First screen -->
     <div class="screen screen_levels">
       <!-- Screen title -->
       <div class="screen__title">
-        <h1 class="title">Уровни</h1>
+        <h1 class="title">{{ $t("pages.levels.title") }}</h1>
       </div>
 
       <ul class="list levels">
-        <Card
-          class="level-item"
-          v-for="(card, index) in getContractInfo.cards"
-          :key="index"
-          :cards="card"
-          :isLoading="cardLoading"
-          @BUY-cardId="buyTableEvent"
-          @REINVEST-cardId="reinvestCardEvent"
-        ></Card>
+        <Card class="level-item" v-for="(card, index) in getContractInfo.cards" :key="index" :cards="card" :isLoading="cardLoading" @BUY-cardId="buyTableEvent" @REINVEST-cardId="reinvestCardEvent"></Card>
         <SuccessModal :propIsOpen="true" v-if="getResponse">
           Стол был успешно куплен!
         </SuccessModal>
-        <ErrorModal
-          v-if="getError.msg === 'Level already active'"
-          :propIsOpen="true"
-        >
-          Стол уже куплен!
+        <ErrorModal v-if="getError.msg === 'Level already active'" :propIsOpen="true">
+          {{ $t("success.tablePurchased") }}
         </ErrorModal>
-        <ErrorModal
-          v-if="getError.msg === 'User denied transaction signature'"
-          :propIsOpen="true"
-        >
-          Операция была отменена, покупка не произведена!
+        <ErrorModal v-if="getError.msg === 'User denied transaction signature'" :propIsOpen="true">
+          {{ $t("error.cancel") }}
         </ErrorModal>
-        <ErrorModal
-          v-if="getError.msg === 'Unknown account'"
-          :propIsOpen="true"
-        >
-          Неизвестный аккаунт! Пожалуйста, выберите другой аккаунт!
+        <ErrorModal v-if="getError.msg === 'Unknown account'" :propIsOpen="true">
+          {{ $t("error.unknownAccount") }}
         </ErrorModal>
-        <ErrorModal
-          v-if="getError.msg === 'All previous levels must be active'"
-          :propIsOpen="true"
-        >
-          Все предыдущие столы должны быть куплены!
+        <ErrorModal v-if="getError.msg === 'All previous levels must be active'" :propIsOpen="true">
+          {{ $t("error.previousTable") }}
         </ErrorModal>
-        <ErrorModal
-          v-if="getError.msg === 'Not enoight token'"
-          :propIsOpen="true"
-        >
-          Недостаточно средств для реинвеста!
+        <ErrorModal v-if="getError.msg === 'Not enoight token'" :propIsOpen="true">
+          {{ $t("error.notEnoightToken") }}
         </ErrorModal>
       </ul>
 
       <!-- Background -->
-      <img
-        src="img/screens/7.webp"
-        alt="bg"
-        class="background background_first"
-      />
-      <img
-        src="img/screens/8.webp"
-        alt="bg"
-        class="background background_second"
-      />
+      <img src="img/screens/7.webp" alt="bg" class="background background_first" />
+      <img src="img/screens/8.webp" alt="bg" class="background background_second" />
     </div>
     <!-- Second screen -->
     <div class="screen screen_data">
@@ -92,39 +65,27 @@
             <span>{{ getAccountInfo.paymant.pullDeposit }}</span>
           </li>
           <li class="item">
-            <p>общий онлайн:</p>
+            <p>online:</p>
             <span>{{ getContractInfo.globalInfo.accountCount }}</span>
           </li>
           <li class="item">
-            <p>кол-во транзакций:</p>
+            <p>Number of transactions:</p>
             <span>{{ getContractInfo.globalInfo.tableCount }}</span>
           </li>
           <li class="item">
-            <p>общий оборот:</p>
+            <p>total turnover:</p>
             <span>{{ getContractInfo.globalInfo.tableMoney }}</span>
           </li>
         </ul>
         <ul class="block info">
           <li class="item">
             <p>Referal Link:</p>
-            <form class="form" @submit.prevent="copyReferal()">
-              <input
-                type="text"
-                class="input"
-                :value="referalLink"
-                disabled
-                id="referalLink"
-              />
-              <button class="button copy">Copy</button>
-            </form>
+            <textarea type="text" class="passwords referal-link" :value="referalLink" disabled id="referalLink"></textarea>
           </li>
           <li class="item item-passwords">
             <p>Passwords:</p>
             <ul class="passwords">
-              <li
-                v-for="(pass, index) in this.getAccountInfo.password"
-                :key="index"
-              >
+              <li v-for="(pass, index) in this.getAccountInfo.password" :key="index">
                 <p>{{ pass }}</p>
               </li>
             </ul>
@@ -137,11 +98,7 @@
         <div class="bg"></div>
       </div>
       <!-- Background -->
-      <img
-        src="img/screens/9.webp"
-        alt="bg"
-        class="background background_first"
-      />
+      <img src="img/screens/9.webp" alt="bg" class="background background_first" />
     </div>
     <div class="loading overlay" v-show="isLoading">
       <div class="loader">
@@ -150,21 +107,21 @@
           <span class="c"></span>
         </span>
       </div>
-      Загрузка, пожалуйста, подождите..
+      {{ $t("loading") }}
     </div>
   </div>
 </template>
 
 <script>
-import Card from "./../components/Card.vue";
-import SuccessModal from "./../components/SuccessModal.vue";
-import ErrorModal from "./../components/ErrorModal.vue";
-
+import Card from "@/components/Card.vue";
+import SuccessModal from "@/components/Modals/SuccessModal.vue";
+import ErrorModal from "@/components/Modals/ErrorModal.vue";
+import localePicker from "@/components/localePicker";
 import { mapGetters } from "vuex";
 
 export default {
   name: "levels",
-  components: { Card, SuccessModal, ErrorModal },
+  components: { Card, SuccessModal, ErrorModal, localePicker },
   data() {
     return {
       isLoading: true,
@@ -177,17 +134,10 @@ export default {
     document.title = this.$route.meta.title;
   },
   computed: {
-    ...mapGetters([
-      "getAccountInfo",
-      "getContractInfo",
-      "getError",
-      "getResponse",
-    ]),
+    ...mapGetters(["getAccountInfo", "getContractInfo", "getError", "getResponse"]),
   },
   mounted() {
-    if (typeof window.ethereum === "undefined")
-      this.$router.push({ name: "Home" });
-
+    if (typeof window.ethereum === "undefined") this.$router.push({ name: "Home" });
     this.address = this.getAccountInfo.address;
 
     window.ethereum.on("accountsChanged", (accounts) => {
@@ -200,8 +150,6 @@ export default {
   methods: {
     // Clicked
     async buyTableEvent(value) {
-      console.log(value.isActive);
-      console.log(this.getContractInfo.cards[value.lvl - 1].isActive);
       if (value.isActive && this.getContractInfo.cards[value.lvl].isActive) {
         this.$store.dispatch("setError", {
           msg: "Level already active",
@@ -237,18 +185,7 @@ export default {
       else this.cardLoading = false;
     },
 
-    // Copy
-    copyReferal() {
-      document.querySelector("#referalLink").select();
-
-      try {
-        document.execCommand("copy");
-        alert("Ссылка успешно скопирована!");
-      } catch (err) {
-        console.log(err);
-      }
-    },
-
+    // Set active status for table
     activedTable() {
       let tables = this.getContractInfo.cards;
 
@@ -257,24 +194,22 @@ export default {
       }
     },
 
-    // Init
+    // Init page
     async init() {
       this.cardLoading = true;
       this.isLoading = true;
 
-      await window.ethereum
-        .request({ method: "eth_requestAccounts" })
-        .then((res) => {
-          this.$store.dispatch("getAccountInfo", res[0]);
-          this.address = res[0];
-        });
+      await window.ethereum.request({ method: "eth_requestAccounts" }).then((res) => {
+        this.$store.dispatch("getAccountInfo", res[0]);
+        this.address = res[0];
+      });
 
       await this.$store.dispatch("clearAccountInfo");
       await this.$store.dispatch("getAccountInfo", this.address);
 
       if (!this.getAccountInfo.password) this.$router.push({ name: "Home" });
 
-      this.getData();
+      await this.getData();
       // Create ref link
       this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.address}`;
     },
