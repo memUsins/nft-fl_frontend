@@ -1,5 +1,5 @@
-export default {
+module.exports = {
   "devServer": {
-    "public": "uniquemultigame.site"
+    "public": "uniquemultigame.ru"
   }
 }

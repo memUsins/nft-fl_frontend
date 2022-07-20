@@ -925,7 +925,7 @@
 
       .item {
         flex-direction: column;
-        justify-content: start;
+        justify-content: flex-start;
         align-items: start;
         gap: 20px;
       }
@@ -945,7 +945,7 @@
   width: 100%;
   height: auto;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 .locale-changer {
@@ -1029,8 +1029,9 @@
         bottom: 0;
       }
     }
+
     @media screen and (max-width: 1024px) {
-     display: block;
+      display: block;
 
     }
   }
@@ -1059,7 +1060,7 @@
     width: inherit;
     top: 30px;
 
-    justify-content: start;
+    justify-content: flex-start;
     align-items: start;
 
     @media screen and (max-width: 1024px) {
@@ -1090,6 +1091,59 @@
     .link:hover,
     .link.active {
       color: @active;
+    }
+  }
+}
+
+.game-layout-content {
+  max-width: 960px;
+  width: 100%;
+  margin-left: 315px;
+  margin-top: 350px;
+  margin-bottom: 200px;
+  justify-content: flex-start;
+  align-items: start;
+
+  * {
+    text-align: left !important;
+    justify-content: flex-start;
+    align-items: start;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  li {
+    list-style: decimal;
+    margin-left: 28px;
+  }
+}
+
+.statspage {
+  margin-top: 350px;
+
+  .screen__title {
+    max-width: 960px;
+    width: 100%;
+    margin-left: 315px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .info {
+    margin-top: 0 !important;
+
+    .item {
+      max-width: 100%;
+      width: 100%;
     }
   }
 }

@@ -142,7 +142,12 @@
         <h1 class="title">{{ $t("pages.home.aboutNumbers.title") }}:</h1>
         <p class="description">{{ $t("pages.home.aboutNumbers.description") }}</p>
       </div>
-      <div class="block-list" v-html="$t('pages.home.aboutNumbers.text')"></div>
+      <div class="block-list">
+        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.one')"></div>
+        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.two')"></div>
+        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.thee')"></div>
+        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.four')"></div>
+      </div>
       <!-- Float picture -->
       <div class="float planet">
         <img src="img/screens/planet.webp" alt="planet" class="img"/>

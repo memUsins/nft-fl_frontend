@@ -39,11 +39,16 @@ export default {
       if (this.isOpen) {
         body.classList.add("disabled");
       } else body.classList.remove("disabled");
+    },
+    sidebarClose: function () {
+      this.isOpen = false;
+      let body = document.querySelector("body");
+      body.classList.remove("disabled");
     }
   },
   watch: {
     $route: function () {
-      this.sidebarToggle()
+      this.sidebarClose()
     }
   }
 }

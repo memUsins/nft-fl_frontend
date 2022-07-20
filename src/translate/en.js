@@ -47,14 +47,12 @@ export default {
       aboutNumbers: {
         title: "About numbers",
         description: "Important: direct investment, as well as reinvestment in the pool is impossible! This will also affect the reactivation in the matrix, thereby replenishing its liquidity.",
-        text: `<div class="block block_bg"><h2>20%</h2><p>with the activation of each level in the matrix, you buy out a share in the pool. The more levels you have activated in the matrix, the greater your income from the pool</p></div>
-            <div class="block block_bg"><h2>40%</h2><p>of your pool income is sent directly to your wallet daily</p>
-            </div>
-            <div class="block block_bg"><h2>20%</h2><p>of your pool income is sent to your balance in the matrix, which can be
-            spend only on paying for levels! Such mechanics will allow you to loop these two games! And make them long-term!</p>
-            </div>
-            <div class="block block_bg"><h2>20%</h2><p>for payment to higher partners, since all your partners are from the matrix,
-            they are assigned to you and in the pool ! You will also receive income from the income of your partners!</p></div>`,
+        text: {
+          one: "<h2>20%</h2><p>with the activation of each level in the matrix, you buy out a share in the pool. The more levels you have activated in the matrix, the greater your income from the pool</p>",
+          two: "<h2>40%</h2><p>of your pool income is sent directly to your wallet daily</p>",
+          three: "<h2>20%</h2><p>of your pool income is sent to your balance in the matrix, which can be spend only on paying for levels! Such mechanics will allow you to loop these two games! And make them long-term!</p>",
+          four: "<h2>20%</h2><p>for payment to higher partners, since all your partners are from the matrix, they are assigned to you and in the pool ! You will also receive income from the income of your partners!</p>"
+        },
       },
     },
     levels: {
@@ -65,6 +63,53 @@ export default {
       pageTitle: "Promo — Unique",
       title: "Promo"
     },
+    stats: {
+      pageTitle: "Stats — Unique",
+      title: "Stats"
+    },
+    passwords: {
+      pageTitle: "Passwords — Unique",
+      title: "Passwords"
+    },
+    howuse: {
+      pageTitle: "How to Use Unique Multi Game — Unique",
+      link: "How use",
+      title: "How to Use Unique Multi Game",
+      textOne: `<p>In this article, we are going to explain how to connect a MetaMask wallet to use Unique Multi Game. This article
+      is created for beginners who have not worked with cryptocurrency or have worked quite a bit.</p>
+        <h3>Unique Multi Game Website: https://uniquemultigame.ru/</h3>
+        <h3>To use Unique Multi Game, you need to have:</h3>
+        <ul>
+          <li>
+            Installed MetaMask with Balance Smart Chain network
+          </li>
+          <li>
+            Have BNB in your MetaMask wallet
+          </li>
+        </ul>
+
+        <h3>Preparing a MetaMask</h3>
+        <p>You need to install a MetaMask wallet to interact with decentralized applications. MetaMask is a simple wallet in
+          which you can store your cryptocurrency, send it to other wallets or invest in projects</p>
+
+        <p>First you need to download MetaMask from the official website: https://metamask.io/</p>`,
+      textTwo: `<p>You now need to fund your MetaMask wallet with BNB in order to participate in the Unique Multi Game.</p>
+      <h3>You can replenish your MetaMask wallet with BNB cryptocurrency using any exchange or any exchange service.</h3>
+      <h3>How to participate in the Unique Multi Game:</h3>
+      <ul>
+        <p>Once you have BNB in MetaMask, you are ready to participate in the Unique Multi Game.</p>
+        <li>
+          Go to https://uniquemultigame.ru//
+        </li>
+        <li>Click on the "Connect Wallet" button.</li>
+        <li>Confirm connection.</li>
+        <li>Confirm that you agree with the rules of the game and understand the principles of the smart contract.</li>
+        <li>Select an available Planet (level).</li>
+        <li>Click on the "Activate" or "Activate + insurance" button.</li>
+        <li>Confirm the transaction.</li>
+        <li>Wait for the smart contract to process the transaction.</li>
+      </ul>`,
+    }
   },
 
   success: {

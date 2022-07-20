@@ -1,6 +1,11 @@
 import {createRouter, createWebHistory} from "vue-router";
-import Home from "../views/Home.vue";
-import i18n from './../translate';
+import Home from "@/views/Home.vue";
+import Levels from "@/views/Levels";
+import Promo from "@/views/Promo";
+import HowUse from "@/views/HowUse";
+import Stats from "@/views/Stats";
+import Passwords from "@/views/Passwords";
+import i18n from '@/translate';
 
 const {t} = i18n.global
 
@@ -21,7 +26,7 @@ const routes = [
       layout: "game",
       title: t("pages.levels.pageTitle"),
     },
-    component: () => import("../views/Levels.vue"),
+    component: Levels,
   },
   {
     path: "/promo",
@@ -30,7 +35,7 @@ const routes = [
       layout: "game",
       title: t("pages.promo.pageTitle"),
     },
-    component: () => import("../views/Promo.vue"),
+    component: Promo,
   },
   {
     path: "/howuse",
@@ -39,7 +44,7 @@ const routes = [
       layout: "game",
       title: t("pages.promo.pageTitle"),
     },
-    component: () => import("../views/Promo.vue"),
+    component: HowUse,
   },
   {
     path: "/stats",
@@ -48,7 +53,7 @@ const routes = [
       layout: "game",
       title: t("pages.promo.pageTitle"),
     },
-    component: () => import("../views/Promo.vue"),
+    component: Stats,
   },
   {
     path: "/passwords",
@@ -57,7 +62,7 @@ const routes = [
       layout: "game",
       title: t("pages.promo.pageTitle"),
     },
-    component: () => import("../views/Promo.vue"),
+    component: Passwords,
   },
 ];
 
