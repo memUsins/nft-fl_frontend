@@ -15,6 +15,11 @@ export default {
     };
   },
   props: ["propIsOpen"],
+  watch: {
+    propIsOpen: function () {
+      this.isOpen = this.propIsOpen;
+    }
+  },
   methods: {
     closeModal() {
       this.isOpen = false;
