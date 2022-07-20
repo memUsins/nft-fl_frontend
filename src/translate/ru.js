@@ -72,9 +72,9 @@ export default {
       title: "Пароли"
     },
     howuse: {
-      pageTitle: "How to Use Unique Multi Game — Unique",
-      link: "How use",
-      title: "How to Use Unique Multi Game",
+      pageTitle: "Как использовать Unique Multi Game — Unique",
+      link: "Как использовать",
+      title: "Как использовать Unique Multi Game",
       textOne: `<p>В этой статье мы собираемся объяснить, как подключить кошелек Metal Mask для использования Unique Multi Game. Эта статья
       создан для новичков, которые не работали с криптовалютой или работали совсем немного.</p>
       <h3>Официальный веб-сайт Unique Multi Game: https://uniquemultigame.ru /</h3>

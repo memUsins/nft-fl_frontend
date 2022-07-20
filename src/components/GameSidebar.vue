@@ -6,11 +6,11 @@
       <div class="bar right"></div>
     </div>
     <div class="game-sidebar block block_bg">
-      <router-link class="link" active-class="active" to="/levels">Уровни</router-link>
-      <router-link class="link" active-class="active" to="/promo">Промо</router-link>
-      <router-link class="link" active-class="active" to="/howuse">Как пользоваться</router-link>
-      <router-link class="link" active-class="active" to="/stats">Статистика</router-link>
-      <router-link class="link" active-class="active" to="/passwords">Пароли</router-link>
+      <router-link class="link" active-class="active" to="/levels">{{ $t("pages.levels.title") }}</router-link>
+      <router-link class="link" active-class="active" to="/promo">{{ $t("pages.promo.title") }}</router-link>
+      <router-link class="link" active-class="active" to="/howuse">{{ $t("pages.howuse.link") }}</router-link>
+      <router-link class="link" active-class="active" to="/stats">{{ $t("pages.stats.title") }}</router-link>
+      <router-link class="link" active-class="active" to="/passwords">{{ $t("pages.passwords.title") }}</router-link>
     </div>
   </div>
 </template>

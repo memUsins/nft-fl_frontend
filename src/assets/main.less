@@ -988,11 +988,17 @@
 
   @media screen and (max-width: 1024px) {
     width: 100%;
-    min-height: 100vh;
+    min-height: 0;
+    height: 0;
     top: 0;
 
     &.active .game-sidebar {
       display: flex;
+    }
+
+    &.active {
+      min-height: 100vh;
+      height: 100%;
     }
 
   }
@@ -1104,6 +1110,8 @@
   justify-content: flex-start;
   align-items: start;
 
+
+
   * {
     text-align: left !important;
     justify-content: flex-start;
@@ -1183,8 +1191,14 @@
 
   .screen_levels .list.levels,
   .screen_levels .screen__title,
-  .screen_data .block-list {
+  .screen_data .block-list,
+  .game-layout-content,
+  .statspage .screen__title {
     margin-left: 0;
+  }
+
+  .game-layout-content {
+    padding: 0 30px;
   }
 }
 
