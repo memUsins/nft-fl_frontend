@@ -2,7 +2,7 @@
   <!-- Main container -->
   <div class="container container_main homepage">
     <div class="locale-header">
-      <localePicker/>
+      <LocalePicker/>
     </div>
 
     <!-- First screen -->
@@ -168,7 +168,7 @@
 
 <script>
 import AuthForm from "./../components/AuthForm.vue";
-import localePicker from "@/components/localePicker";
+import LocalePicker from "@/components/LocalePicker";
 
 export default {
   name: "home",
@@ -183,6 +183,6 @@ export default {
   created() {
     document.title = this.$route.meta.title;
   },
-  components: {AuthForm, localePicker},
+  components: {AuthForm, LocalePicker},
 };
 </script>

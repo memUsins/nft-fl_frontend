@@ -1,10 +1,6 @@
 <template>
   <!-- Main container -->
   <div class="container container_main levelspage">
-    <div class="locale-header">
-      <localePicker />
-    </div>
-
     <!-- First screen -->
     <div class="screen screen_levels">
       <!-- Screen title -->
@@ -13,7 +9,8 @@
       </div>
 
       <ul class="list levels">
-        <Card class="level-item" v-for="(card, index) in getContractInfo.cards" :key="index" :cards="card" :isLoading="cardLoading" @BUY-cardId="buyTableEvent" @REINVEST-cardId="reinvestCardEvent"></Card>
+        <Card class="level-item" v-for="(card, index) in getContractInfo.cards" :key="index" :cards="card"
+              :isLoading="cardLoading" @BUY-cardId="buyTableEvent" @REINVEST-cardId="reinvestCardEvent"></Card>
         <SuccessModal :propIsOpen="true" v-if="getResponse">
           Стол был успешно куплен!
         </SuccessModal>
@@ -35,8 +32,8 @@
       </ul>
 
       <!-- Background -->
-      <img src="img/screens/7.webp" alt="bg" class="background background_first" />
-      <img src="img/screens/8.webp" alt="bg" class="background background_second" />
+      <img src="img/screens/7.webp" alt="bg" class="background background_first"/>
+      <img src="img/screens/8.webp" alt="bg" class="background background_second"/>
     </div>
     <!-- Second screen -->
     <div class="screen screen_data">
@@ -80,7 +77,8 @@
         <ul class="block info">
           <li class="item">
             <p>Referal Link:</p>
-            <textarea type="text" class="passwords referal-link" :value="referalLink" disabled id="referalLink"></textarea>
+            <textarea type="text" class="passwords referal-link" :value="referalLink" disabled
+                      id="referalLink"></textarea>
           </li>
           <li class="item item-passwords">
             <p>Passwords:</p>
@@ -94,11 +92,11 @@
       </div>
       <!-- Float picture -->
       <div class="float ufo">
-        <img src="img/screens/ufo.webp" alt="ufo" class="img" />
+        <img src="img/screens/ufo.webp" alt="ufo" class="img"/>
         <div class="bg"></div>
       </div>
       <!-- Background -->
-      <img src="img/screens/9.webp" alt="bg" class="background background_first" />
+      <img src="img/screens/9.webp" alt="bg" class="background background_first"/>
     </div>
     <div class="loading overlay" v-show="isLoading">
       <div class="loader">
@@ -116,12 +114,11 @@
 import Card from "@/components/Card.vue";
 import SuccessModal from "@/components/Modals/SuccessModal.vue";
 import ErrorModal from "@/components/Modals/ErrorModal.vue";
-import localePicker from "@/components/localePicker";
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
 
 export default {
   name: "levels",
-  components: { Card, SuccessModal, ErrorModal, localePicker },
+  components: {Card, SuccessModal, ErrorModal},
   data() {
     return {
       isLoading: true,
@@ -137,7 +134,7 @@ export default {
     ...mapGetters(["getAccountInfo", "getContractInfo", "getError", "getResponse"]),
   },
   mounted() {
-    if (typeof window.ethereum === "undefined") this.$router.push({ name: "Home" });
+    if (typeof window.ethereum === "undefined") this.$router.push({name: "Home"});
     this.address = this.getAccountInfo.address;
 
     window.ethereum.on("accountsChanged", (accounts) => {
@@ -190,7 +187,7 @@ export default {
       let tables = this.getContractInfo.cards;
 
       if (!tables[0].isActived) {
-        this.$store.dispatch("activeTable", { lvl: 1, status: true });
+        this.$store.dispatch("activeTable", {lvl: 1, status: true});
       }
     },
 
@@ -199,7 +196,7 @@ export default {
       this.cardLoading = true;
       this.isLoading = true;
 
-      await window.ethereum.request({ method: "eth_requestAccounts" }).then((res) => {
+      await window.ethereum.request({method: "eth_requestAccounts"}).then((res) => {
         this.$store.dispatch("getAccountInfo", res[0]);
         this.address = res[0];
       });
@@ -207,7 +204,7 @@ export default {
       await this.$store.dispatch("clearAccountInfo");
       await this.$store.dispatch("getAccountInfo", this.address);
 
-      if (!this.getAccountInfo.password) this.$router.push({ name: "Home" });
+      if (!this.getAccountInfo.password) this.$router.push({name: "Home"});
 
       await this.getData();
       // Create ref link

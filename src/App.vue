@@ -7,6 +7,7 @@
 <script>
 import EmptyLayout from "./layouts/EmptyLayout.vue";
 import MainLayout from "./layouts/MainLayout.vue";
+import GameLayout from "@/layouts/GameLayout";
 import Cookies from "js-cookie";
 
 export default {
@@ -25,12 +26,12 @@ export default {
       return (this.$route.meta.layout || "empty") + "-layout";
     },
   },
-  components: {EmptyLayout, MainLayout},
   watch: {
     "$i18n.locale": function (newVal) {
       localStorage.setItem("last-locale", newVal);
     },
   },
+  components: {EmptyLayout, MainLayout, GameLayout},
 };
 </script>
 

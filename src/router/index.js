@@ -18,7 +18,7 @@ const routes = [
     path: "/levels",
     name: "Levels",
     meta: {
-      layout: "main",
+      layout: "game",
       title: t("pages.levels.pageTitle"),
     },
     component: () => import("../views/Levels.vue"),
@@ -27,7 +27,34 @@ const routes = [
     path: "/promo",
     name: "Promo",
     meta: {
-      layout: "main",
+      layout: "game",
+      title: t("pages.promo.pageTitle"),
+    },
+    component: () => import("../views/Promo.vue"),
+  },
+  {
+    path: "/howuse",
+    name: "HowUse",
+    meta: {
+      layout: "game",
+      title: t("pages.promo.pageTitle"),
+    },
+    component: () => import("../views/Promo.vue"),
+  },
+  {
+    path: "/stats",
+    name: "Stats",
+    meta: {
+      layout: "game",
+      title: t("pages.promo.pageTitle"),
+    },
+    component: () => import("../views/Promo.vue"),
+  },
+  {
+    path: "/passwords",
+    name: "Passwords",
+    meta: {
+      layout: "game",
       title: t("pages.promo.pageTitle"),
     },
     component: () => import("../views/Promo.vue"),
