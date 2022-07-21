@@ -101,7 +101,6 @@ export default {
               name: err.name, msg: err.message, env: err.stack,
             });
           }
-          console.log(err);
         });
     },
 
@@ -130,9 +129,6 @@ export default {
       await reinvestContract.methods
         .RewardToPull(pullId)
         .send(data)
-        .then((res) => {
-          console.log(res);
-        })
         .catch((err) => {
           ctx.commit("setError", {
             name: err.name, msg: err.message, env: err.stack,
@@ -214,7 +210,6 @@ export default {
           from: address,
         })
         .then((res) => {
-          console.log(res);
           let response = {
             webId: userId, referalAddress: res[1], referalCount: res[2], paymant: {
               table: web3.utils.fromWei(String(res[3][0]), "ether"),
@@ -227,7 +222,7 @@ export default {
 
           ctx.commit("setAccountInfo", response);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => err);
     },
 
     /**
@@ -376,9 +371,7 @@ export default {
         .then((res) => {
           pullCount = res;
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch((err) => err);
 
       let pullInfo = [];
       for (let pull = 1; pull <= pullCount; pull++) {
@@ -391,9 +384,7 @@ export default {
           .then((res) => {
             info = res;
           })
-          .catch((err) => {
-            console.log(err);
-          });
+          .catch((err) => err);
         pullInfo.push(info);
       }
       return pullInfo;
@@ -407,20 +398,29 @@ export default {
      * @returns {Object}
      */
     async register(ctx, data) {
+      // Connect to metamask
       await ctx.dispatch("connect");
+
+      // Set user address
       let address = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       address = address[0];
+
+      // Set user id
       let userId = data.referalId || 0;
       let metaUserId = 0;
 
+      // Check referal
       if (data.referalId) {
+
+        // Check referal in backend
         let referalInfo = await axios
           .get(`${process.env.VUE_APP_API}account/${userId}`)
           .then((res) => res.data.data)
           .catch(() => false);
 
+        // Check referal in chain
         if (referalInfo) {
           userId = referalInfo.id;
           metaUserId = await viewContract.methods
@@ -431,6 +431,7 @@ export default {
         } else metaUserId = 0;
       }
 
+      // Register in chain
       let metamaskReg = await matrixContract.methods
         .registerWithReferrer(metaUserId)
         .send({
@@ -447,8 +448,11 @@ export default {
               name: err.name, msg: err.message, env: err.stack,
             });
           }
+
+          return false;
         });
 
+      // Register in backend
       if (metamaskReg) {
         let accountData = {
           address: address, password: data.password, referalId: userId || 0,
@@ -465,7 +469,6 @@ export default {
       await axios
         .get(`${process.env.VUE_APP_API}password/check/${data}`)
         .then((res) => {
-          console.log(res.data.data)
           if (res.data.status) ctx.commit("setSuccess", res.data.data);
         })
         .catch((err) => ctx.commit("setError", err.response.data.error));
@@ -614,22 +617,26 @@ export default {
     },
 
     setAgree(state, data) {
-      console.log(state.accountInfo.isAgree);
       state.accountInfo.isAgree = data;
-      console.log(state.accountInfo.isAgree);
       Cookies.set("isAgree", data);
     },
-  }, state: {
-    cards: [{
-      lvl: 0,
-      price: 0,
-      paymantCount: null,
-      paymant: null,
-      activedCount: null,
-      bonus: null,
-      progress: null,
-      isActive: false,
-    },], cardPrice: [0.04, 0.07, 0.12, 0.2, 0.35, 0.6, 1.3, 2.1, 3.3, 4.7, 6, 8, 11, 14, 16, 20], accountInfo: {
+
+  },
+  state: {
+    cards: [
+      {
+        lvl: 0,
+        price: 0,
+        paymantCount: null,
+        paymant: null,
+        activedCount: null,
+        bonus: null,
+        progress: null,
+        isActive: false,
+      },
+    ],
+    cardPrice: [0.04, 0.07, 0.12, 0.2, 0.35, 0.6, 1.3, 2.1, 3.3, 4.7, 6, 8, 11, 14, 16, 20],
+    accountInfo: {
       id: null,
       webId: null,
       address: null,
@@ -642,19 +649,27 @@ export default {
         table: null, referal: null, pullDeposit: null, pull: null, pullReferal: null,
       },
       isAgree: false,
-    }, globalInfo: {
+    },
+    globalInfo: {
       accountCount: null, tableCount: null, pullMoney: null, tableMoney: null, pullCount: null, pullPaymant: null,
-    }, activedTable: [], error: {
+    },
+    activedTable: [],
+    error: {
       msg: null, name: null, env: null,
-    }, response: null,
-  }, getters: {
+    },
+    response: null,
+  },
+  getters: {
     getContractInfo(state) {
       return state;
-    }, getAccountInfo(state) {
+    },
+    getAccountInfo(state) {
       return state.accountInfo;
-    }, getError(state) {
+    },
+    getError(state) {
       return state.error;
-    }, getResponse(state) {
+    },
+    getResponse(state) {
       return state.response;
     },
   },

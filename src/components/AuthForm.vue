@@ -35,6 +35,7 @@
 import {mapGetters} from "vuex";
 import errorModal from "./Modals/ErrorModal";
 import agreeModal from "./Modals/AgreeModal";
+import axios from "axios";
 
 export default {
   name: "auth-form",
@@ -61,27 +62,37 @@ export default {
       if (!this.password) return (this.password = "");
       this.isDisabled = true;
 
+      // Agree terms
       if (!this.getAccountInfo.isAgree) this.agreeOpen = true;
       else this.agreeOpen = false;
 
+      // Metamask error
       if (!this.getAccountInfo.address) {
         this.isDisabled = false;
-        return (this.loginError = true);
+        return this.loginError = true;
       }
 
       if (this.getAccountInfo.isAgree) {
         await this.$store.dispatch("checkPassword", this.password);
 
+        // Is correct password
         if (this.getResponse !== null && this.getError.msg === null) {
           await this.$store.dispatch("clearResponse");
+
+          // Check local referal
+          let referalId = this.$route.query.referalId || 0;
+
+          let localReferal = localStorage.getItem("referalId");
+          let checkLocalReferal = await axios.get(`${process.env.VUE_APP_API}account/${localReferal}`).then((res) => res).catch(() => false);
+
+          if (checkLocalReferal) referalId = localReferal;
+
           let data = {
             password: this.password,
-            referalId: this.$route.query.referalId || 0,
+            referalId
           };
 
           await this.$store.dispatch("register", data);
-
-          // if (this.getAccountInfo.id) this.$router.push({name: "Levels"});
         }
       }
 

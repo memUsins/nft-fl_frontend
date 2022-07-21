@@ -21,10 +21,20 @@ export default {
 
     if (Cookies.get("isAgree")) this.$store.dispatch("setAgree", true);
   },
+  beforeUpdate() {
+    this.setReferalId();
+  },
   computed: {
     layout() {
       return (this.$route.meta.layout || "empty") + "-layout";
     },
+  },
+  methods: {
+    setReferalId() {
+      if (this.$route.query.referalId && !localStorage.getItem("referalId")) {
+        localStorage.setItem("referalId", this.$route.query.referalId);
+      }
+    }
   },
   watch: {
     "$i18n.locale": function (newVal) {
