@@ -5,9 +5,6 @@ import Promo from "@/views/Promo";
 import HowUse from "@/views/HowUse";
 import Stats from "@/views/Stats";
 import Passwords from "@/views/Passwords";
-import i18n from '@/translate';
-
-const {t} = i18n.global
 
 const routes = [
   {
@@ -15,7 +12,6 @@ const routes = [
     name: "Home",
     meta: {
       layout: "main",
-      title: t("pages.home.pageTitle"),
     },
     component: Home,
   },
@@ -24,7 +20,6 @@ const routes = [
     name: "Levels",
     meta: {
       layout: "game",
-      title: t("pages.levels.pageTitle"),
     },
     component: Levels,
   },
@@ -33,7 +28,6 @@ const routes = [
     name: "Promo",
     meta: {
       layout: "game",
-      title: t("pages.promo.pageTitle"),
     },
     component: Promo,
   },
@@ -42,7 +36,6 @@ const routes = [
     name: "HowUse",
     meta: {
       layout: "game",
-      title: t("pages.howuse.pageTitle"),
     },
     component: HowUse,
   },
@@ -51,7 +44,6 @@ const routes = [
     name: "Stats",
     meta: {
       layout: "game",
-      title: t("pages.stats.pageTitle"),
     },
     component: Stats,
   },
@@ -60,7 +52,6 @@ const routes = [
     name: "Passwords",
     meta: {
       layout: "game",
-      title: t("pages.passwords.pageTitle"),
     },
     component: Passwords,
   },

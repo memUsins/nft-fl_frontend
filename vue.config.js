@@ -1,5 +1,5 @@
 module.exports = {
   "devServer": {
-    "public": "uniquemultigame.ru"
+    "public": "https://uniquemultigame.ru"
   }
 }

@@ -40,14 +40,16 @@ export default {
   },
   mounted() {
     if (typeof window.ethereum === "undefined") this.$router.push({name: "Home"});
-    this.address = this.getAccountInfo.address;
+    else {
+      this.address = this.getAccountInfo.address;
 
-    window.ethereum.on("accountsChanged", (accounts) => {
-      this.address = accounts[0];
+      window.ethereum.on("accountsChanged", (accounts) => {
+        this.address = accounts[0];
+        this.init();
+      });
+
       this.init();
-    });
-
-    this.init();
+    }
   },
   methods: {
 

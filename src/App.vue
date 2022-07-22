@@ -1,4 +1,7 @@
 <template>
+  <div class="is-have-ethereum" v-if="!isEthereum">
+    <p v-html="$t('error.isNotMetamask')"></p>
+  </div>
   <component :is="layout">
     <router-view/>
   </component>
@@ -12,15 +15,20 @@ import Cookies from "js-cookie";
 
 export default {
   name: "home",
+  data() {
+    return {
+      isEthereum: false,
+    };
+  },
   mounted() {
+    if (typeof window.ethereum !== "undefined") this.isEthereum = true;
     if (window.ethereum) {
       window.ethereum.request({method: "eth_requestAccounts"}).then(async (res) => {
         await this.$store.dispatch("getAccountInfo", res[0]);
-      });
+      }).catch(() => this.$router.push({name: "Home"}));
     }
 
     if (Cookies.get("isAgree")) this.$store.dispatch("setAgree", true);
-    this.setTitle();
   },
   beforeUpdate() {
     this.setReferalId();

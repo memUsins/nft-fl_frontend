@@ -165,9 +165,6 @@
       <!-- Form -->
       <AuthForm></AuthForm>
     </div>
-    <div class="is-have-ethereum" v-if="!isEthereum">
-      <p v-html="$t('error.isNotMetamask')"></p>
-    </div>
   </div>
 </template>
 
@@ -177,14 +174,6 @@ import LocalePicker from "@/components/LocalePicker";
 
 export default {
   name: "home",
-  data() {
-    return {
-      isEthereum: false,
-    };
-  },
-  mounted() {
-    if (typeof window.ethereum !== "undefined") this.isEthereum = true;
-  },
   components: {AuthForm, LocalePicker},
 };
 </script>
