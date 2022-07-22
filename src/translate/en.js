@@ -19,7 +19,7 @@ export default {
       },
       howWork: {
         title: "How it works",
-        text: `<p>In the UNIQUE Matrix game, there are 16 levels dependent on each other, which can be opened from 1 to 16 in turn.<br/><span>Important: To activate your account and start the game, you will need a unique code that can be obtained from the first players.</span></p><p>The unique code is the hype containment mechanics! For each payment of 2 of any levels, 1 activation code is given.</p><p>After activating each level, 20% of your payment goes to your profile in the farm pool. Thus, you get in line for payments from the farm pool. There will be two tabs in your profile:</p>`,
+        text: `<p>In the UNIQUE Matrix game, there are 16 levels dependent on each other, which can be opened from 1 to 16 in turn.<br/></p><p>After activating each level, 20% of your payment goes to your profile in the farm pool. Thus, you get in line for payments from the farm pool. There will be two tabs in your profile:</p>`,
         uniqueMatrix: "там будут уровни матрицы и ваш доход с неё, а также доход с партнёров",
         uniqueFarming: "there will be your daily income from the pool, as well as income from the income of your partners",
       },
@@ -119,6 +119,7 @@ export default {
   error: {
     cancel: "The operation was canceled, the purchase was not made!",
     unknownAccount: "Unknown account! Please choose a different account!",
+    tableIsPurchased: "The table has already been bought!",
     previousTable: "All previous tables must be purchased!",
     notEnoightToken: "Not enough funds for reinvestment!",
     isNotMetamask: "There is no Metamask in your browser. Try reloading the page or <a href='https://metamask.io/'>install the Metamask extension</a> in your browser",

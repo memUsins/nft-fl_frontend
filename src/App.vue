@@ -21,17 +21,15 @@ export default {
     };
   },
   mounted() {
-    if (typeof window.ethereum !== "undefined") this.isEthereum = true;
-    if (window.ethereum) {
-      window.ethereum.request({method: "eth_requestAccounts"}).then(async (res) => {
-        await this.$store.dispatch("getAccountInfo", res[0]);
-      }).catch(() => this.$router.push({name: "Home"}));
+    if (typeof window.ethereum !== "undefined") {
+      this.isEthereum = true;
+      this.$store.dispatch("getFullUserInfo")
     }
 
     if (Cookies.get("isAgree")) this.$store.dispatch("setAgree", true);
   },
   beforeUpdate() {
-    this.setReferalId();
+    this.setReferralId();
   },
   computed: {
     layout() {
@@ -39,9 +37,9 @@ export default {
     },
   },
   methods: {
-    setReferalId() {
-      if (this.$route.query.referalId && !localStorage.getItem("referalId")) {
-        localStorage.setItem("referalId", this.$route.query.referalId);
+    setReferralId() {
+      if (this.$route.query.referralId && !localStorage.getItem("referralId")) {
+        localStorage.setItem("referralId", this.$route.query.referralId);
       }
     },
     setTitle() {

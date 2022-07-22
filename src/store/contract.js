@@ -1,4 +1,3 @@
-import axios from "axios";
 import Cookies from "js-cookie";
 import Web3 from "web3";
 
@@ -18,87 +17,101 @@ export default {
   actions: {
     /**
      * Connect
-     *
-     * @returns {Object}
      */
     async connect() {
-      if (typeof window.ethereum !== "undefined") {
-        try {
-          let data = {
-            method: "wallet_switchEthereumChain", params: [{
-              chainId: "0x38",
-            },],
-          };
-          await window.ethereum.request(data);
-        } catch (switchError) {
-          let data = {
-            method: "wallet_addEthereumChain", params: [{
-              chainId: "0x38", chainName: "Smart Chain", rpcUrls: ["https://bsc-dataseed.binance.org/"],
-            },],
-          };
-          if (switchError.code === 4902) {
-            await window.ethereum.request(data).catch((err) => {
-              console.log(err);
-            });
-          }
-        }
-      }
+      // if (typeof window.ethereum !== "undefined") {
+      //   try {
+      //     let data = {
+      //       method: "wallet_switchEthereumChain",
+      //       params: [{chainId: "0x38"}],
+      //     };
+      //     await window.ethereum.request(data);
+      //   } catch (err) {
+      //     let data = {
+      //       method: "wallet_addEthereumChain",
+      //       params: [
+      //         {
+      //           chainId: "0x38",
+      //           chainName: "Smart Chain",
+      //           rpcUrls: ["https://bsc-dataseed.binance.org/"],
+      //         },
+      //       ],
+      //     };
+      //     if (err.code === 4902) {
+      //       await window.ethereum.request(data).catch((err) => {
+      //         console.log(err);
+      //       });
+      //     }
+      //   }
+      // }
     },
 
     /**
      * buyTable
      *
-     * @param {string} address account address
-     * @param {Number} table table id
+     * @param {Number} lvl table lvl
      * @param {Number} sum table price
-     * @param {Number} refId account referal id
-     *
-     * @returns {Object}
+     * @param {Number} referralId account referral id
      */
     async buyTable(ctx, data) {
       await ctx.dispatch("connect");
 
-      // Get address
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let price = String(data.price);
 
       let qdata = {
-        from: address, value: web3.utils.toWei(price, "ether"), gas: gasBuy,
+        from: address,
+        value: web3.utils.toWei(price, "ether"),
+        gas: gasBuy,
       };
 
       await matrixContract.methods
-        .BuyTable(data.lvl, data.referalId || 0)
+        .BuyTable(data.lvl, data.referralId || 0)
         .send(qdata)
         .then(() => {
+          let dataLvl;
+          if (data.lvl + 1 !== 16) dataLvl = ++data.lvl;
+          else dataLvl = data.lvl;
+
           ctx.dispatch("activeTable", {
-            lvl: data.lvl + 1, status: true,
+            lvl: dataLvl,
+            status: true,
           });
-          ctx.commit("setSuccess", true);
+          ctx.commit("setResponse", true);
         })
         .catch((err) => {
           if (err.message.indexOf("Level already active") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "Level already active", env: err.stack,
+              name: err.name,
+              msg: "Level already active",
+              env: err.stack,
             });
           } else if (err.message.indexOf("unknown account") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "Unknown account", env: err.stack,
+              name: err.name,
+              msg: "Unknown account",
+              env: err.stack,
             });
           } else if (err.message.indexOf("All previous levels must be active") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "All previous levels must be active", env: err.stack,
+              name: err.name,
+              msg: "All previous levels must be active",
+              env: err.stack,
             });
           } else if (err.message.indexOf("User denied transaction signature") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "User denied transaction signature", env: err.stack,
+              name: err.name,
+              msg: "User denied transaction signature",
+              env: err.stack,
             });
           } else {
             ctx.commit("setError", {
-              name: err.name, msg: err.message, env: err.stack,
+              name: err.name,
+              msg: err.message,
+              env: err.stack,
             });
           }
         });
@@ -110,20 +123,18 @@ export default {
      * @param {string} address account address
      * @param {Number} pullId pull id
      * @param {Number} sum price
-     *
-     * @returns {Object}
      */
     async pullReward(ctx, pullId, sum) {
       await ctx.dispatch("connect");
 
-      // Get address
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let data = {
-        from: address, value: sum, gas: gasBuy,
+        from: address,
+        value: sum,
+        gas: gasBuy,
       };
 
       await reinvestContract.methods
@@ -131,7 +142,9 @@ export default {
         .send(data)
         .catch((err) => {
           ctx.commit("setError", {
-            name: err.name, msg: err.message, env: err.stack,
+            name: err.name,
+            msg: err.message,
+            env: err.stack,
           });
         });
     },
@@ -140,42 +153,48 @@ export default {
      * Reinvest
      *
      * @param {string} address account address
-     * @param {Number} table table id
-     *
-     * @returns {Object}
+     * @param {object} table table id
      */
     async reinvest(ctx, table) {
       await ctx.dispatch("connect");
 
-      // Get address
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let data = {
-        from: address, value: 0, gas: gasBuy,
+        from: address,
+        value: 0,
+        gas: gasBuy,
       };
+
       await reinvestContract.methods
         .ReinvestTable(table.lvl, address)
         .send(data)
         .then(() => {
           let dataLvl;
-          if (data.lvl + 1 != 16) dataLvl = ++data.lvl; else dataLvl = data.lvl;
+          if (table.lvl + 1 !== 16) dataLvl = ++table.lvl;
+          else dataLvl = table.lvl;
 
           ctx.dispatch("activeTable", {
-            lvl: dataLvl, status: true,
+            lvl: dataLvl,
+            status: true,
           });
-          ctx.commit("setSuccess", true);
+
+          ctx.commit("setResponse", true);
         })
         .catch((err) => {
           if (err.message.indexOf("Not enoight token") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "Not enoight token", env: err.stack,
+              name: err.name,
+              msg: "Not enoight token",
+              env: err.stack,
             });
           } else {
             ctx.commit("setError", {
-              name: err.name, msg: err.message, env: err.stack,
+              name: err.name,
+              msg: err.message,
+              env: err.stack,
             });
           }
         });
@@ -183,40 +202,35 @@ export default {
 
     /**
      * getFullUserInfo
-     *
-     * @param {string} address account address
-     *
-     * @returns {Object}
      */
     async getFullUserInfo(ctx) {
       await ctx.dispatch("connect");
 
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let userId = await viewContract.methods
         .GetUserId(address)
-        .call({
-          from: address,
-        })
+        .call({from: address})
         .then((res) => res)
         .catch(() => null);
 
       await viewContract.methods
         .GetFullUserInfo(address)
-        .call({
-          from: address,
-        })
+        .call({from: address})
         .then((res) => {
           let response = {
-            webId: userId, referalAddress: res[1], referalCount: res[2], paymant: {
+            webId: userId,
+            address,
+            referralAddress: res[1],
+            referralCount: res[2],
+            paymant: {
               table: web3.utils.fromWei(String(res[3][0]), "ether"),
-              referal: web3.utils.fromWei(String(res[3][1]), "ether"),
+              referral: web3.utils.fromWei(String(res[3][1]), "ether"),
               pullDeposit: res[3][2],
               pull: res[3][3],
-              pullReferal: res[3][4],
+              pullReferral: res[3][4],
             },
           };
 
@@ -227,24 +241,17 @@ export default {
 
     /**
      * GetUserTableProgress
-     *
-     * @param {string} address account address
-     *
-     * @returns {Array}
      */
     async getUserTableProgress(ctx) {
       await ctx.dispatch("connect");
 
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let userId = await viewContract.methods
         .GetUserId(address)
-        .call({
-          from: address,
-        })
+        .call({from: address})
         .then((res) => res)
         .catch(() => null);
 
@@ -253,9 +260,7 @@ export default {
         for (let table = 1; table <= 16; table++) {
           await viewContract.methods
             .GetTablePosition(userId, address, table)
-            .call({
-              from: address,
-            })
+            .call({from: address})
             .then((res) => {
               if (res[0] == 0) {
                 places.push(0);
@@ -271,44 +276,40 @@ export default {
 
     /**
      * getUserLevels
-     *
-     * @param {string} address account address
-     *
-     * @returns {Object}
      */
     async getUserLevels(ctx) {
       await ctx.dispatch("connect");
 
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       let userId = await viewContract.methods
         .GetUserId(address)
-        .call({
-          from: address,
-        })
+        .call({from: address})
         .then((res) => res)
         .catch(() => null);
 
       if (userId) {
         await viewContract.methods
           .GetUserLevels(userId)
-          .call({
-            from: address,
-          })
+          .call({from: address})
           .then((res) => {
             let response = {
-              activedTable: res[0], tableInfo: {
-                paymantCount: res[1], activedCount: res[2], paymant: res[3],
+              activedTable: res[0],
+              tableInfo: {
+                paymantCount: res[1],
+                activedCount: res[2],
+                paymant: res[3],
               },
             };
             ctx.commit("setTableInfo", response);
           })
           .catch((err) => {
             ctx.commit("setError", {
-              name: err.name, msg: err.message, env: err.stack,
+              name: err.name,
+              msg: err.message,
+              env: err.stack,
             });
           });
       }
@@ -316,31 +317,17 @@ export default {
 
     /**
      * getGlobalStat
-     *
-     * @param {string} address account address
-     *
-     * @returns {Object}
      */
     async getGlobalStat(ctx) {
       await ctx.dispatch("connect");
 
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
-      await window.ethereum
-        .request({
-          method: "eth_requestAccounts",
-        })
-        .then((res) => {
-          address = res[0];
-        });
 
       await viewContract.methods
         .GetGlobalInfo()
-        .call({
-          from: address,
-        })
+        .call({from: address})
         .then((res) => {
           let response = {
             accountCount: res[0],
@@ -350,41 +337,35 @@ export default {
             pullCount: res[4],
             pullPaymant: res[5],
           };
+
           ctx.commit("setGlobalInfo", response);
         });
     },
 
-    async GetPullsInfo(ctx) {
+    /**
+     * getPullsInfo
+     */
+    async getPullsInfo(ctx) {
       await ctx.dispatch("connect");
 
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Set user address
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
-      let pullCount;
-      await viewContract.methods
+      let pullCount = await viewContract.methods
         .GetPullCount()
-        .call({
-          from: address,
-        })
-        .then((res) => {
-          pullCount = res;
-        })
+        .call({from: address})
+        .then((res) => res)
         .catch((err) => err);
 
       let pullInfo = [];
       for (let pull = 1; pull <= pullCount; pull++) {
-        let info;
-        await viewContract.methods
+        let info = await viewContract.methods
           .GetPullById(pull)
-          .call({
-            from: address,
-          })
-          .then((res) => {
-            info = res;
-          })
+          .call({from: address})
+          .then((res) => res)
           .catch((err) => err);
+
         pullInfo.push(info);
       }
       return pullInfo;
@@ -393,156 +374,119 @@ export default {
     /**
      * register
      *
-     * @param {Object} data password, address
-     *
-     * @returns {Object}
+     * @param {String} referralAddress referralAddress
      */
-    async register(ctx, data) {
+    async register(ctx, referralAddress) {
       // Connect to metamask
       await ctx.dispatch("connect");
 
       // Set user address
-      let address = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      let address = await window.ethereum.request({method: "eth_requestAccounts"});
       address = address[0];
 
       // Set user id
-      let userId = data.referalId || 1;
       let metaUserId = 1;
 
-      // Check referal
-      if (data.referalId) {
-
-        // Check referal in backend
-        let referalInfo = await axios
-          .get(`${process.env.VUE_APP_API}account/${userId}`)
-          .then((res) => res.data.data)
-          .catch(() => false);
-
-        // Check referal in chain
-        if (referalInfo) {
-          userId = referalInfo.id;
-          metaUserId = await viewContract.methods
-            .GetUserId(data.referalId)
-            .call({from: address})
-            .then((res) => res)
-            .catch(() => 1);
-        }
+      // Check referral in chain
+      if (referralAddress) {
+        metaUserId = await viewContract.methods
+          .GetUserId(referralAddress)
+          .call({from: address})
+          .then((res) => res)
+          .catch(() => 1);
       }
 
       // Register in chain
-      let metamaskReg = await matrixContract.methods
+      await matrixContract.methods
         .registerWithReferrer(metaUserId)
         .send({
-          from: address, value: 0, gas: 900000,
+          from: address,
+          value: 0,
+          gas: 900000,
         })
         .then(() => true)
         .catch((err) => {
           if (err.message.indexOf("User denied transaction signature") !== -1) {
             ctx.commit("setError", {
-              name: err.name, msg: "User denied transaction signature", env: err.stack,
+              name: err.name,
+              msg: "User denied transaction signature",
+              env: err.stack,
             });
           } else {
             ctx.commit("setError", {
-              name: err.name, msg: err.message, env: err.stack,
+              name: err.name,
+              msg: err.message,
+              env: err.stack,
             });
           }
-
           return false;
         });
-
-      // Register in backend
-      if (metamaskReg) {
-        let accountData = {
-          address: address, password: data.password, referalId: userId || 0,
-        };
-
-        await axios
-          .post(`${process.env.VUE_APP_API}account/create`, accountData)
-          .then((res) => ctx.commit("setAccountInfo", res.data.data))
-          .catch((err) => ctx.commit("setError", err.response.data.error));
-      }
-    },
-
-    async checkPassword(ctx, data) {
-      await axios
-        .get(`${process.env.VUE_APP_API}password/check/${data}`)
-        .then((res) => {
-          if (res.data.status) ctx.commit("setSuccess", res.data.data);
-        })
-        .catch((err) => ctx.commit("setError", err.response.data.error));
     },
 
     /**
-     * getAccountInfo
-     *
-     * @param {string} data address
-     *
-     * @returns {Object}
+     * setError
      */
-    async getAccountInfo(ctx, data) {
-      await axios
-        .get(`${process.env.VUE_APP_API}account/${data}`)
-        .then((res) => {
-          if (res.data.status) ctx.commit("setAccountInfo", res.data.data);
-        })
-        .catch((err) => {
-          if (!err.response.data.status) ctx.commit("setAddress", data);
-        });
-    },
-
-    /**
-     * checkPassCount
-     *
-     * @param {Object} data address refCount tableCount
-     *
-     * @returns {Object}
-     */
-    async checkPassCount(ctx, data) {
-      await axios.post(`${process.env.VUE_APP_API}password/checkCount`, data).catch((err) => ctx.commit("setError", err.response.data.error));
-    },
-
-    clearAccountInfo(ctx) {
-      ctx.commit("clearAccountInfo");
-    },
-
     setError(ctx, data) {
       ctx.commit("setError", data);
     },
 
-    clearError(ctx) {
-      ctx.commit("setError", {
-        msg: null, name: null, env: null,
-      });
+    /**
+     * setResponse
+     */
+    setResponse(ctx, data) {
+      ctx.commit("setResponse", data);
     },
 
-    clearResponse(ctx) {
-      ctx.commit("setSuccess", false);
-    },
-
+    /**
+     * setAgree
+     */
     setAgree(ctx, date) {
       ctx.commit("setAgree", date);
     },
 
+    /**
+     * activeTable
+     */
     activeTable(ctx, table) {
       ctx.commit("setActiveTable", table);
     },
+  },
+  mutations: {
 
-    insertAddress(ctx, data) {
-      return ctx.commit("setAddress", data);
-    },
-  }, mutations: {
+    /**
+     * setError
+     */
     setError(state, data) {
-      state.error = data;
+      if (data) state.error = data;
+      else {
+        state.error = {
+          msg: null,
+          name: null,
+          env: null,
+        }
+      }
     },
 
-    setSuccess(state, data) {
+    /**
+     * setResponse
+     */
+    setResponse(state, data) {
       state.response = data;
     },
 
+    /**
+     * setAccountInfo
+     */
+    setAccountInfo(state, data) {
+      state.accountInfo = Object.assign(state.accountInfo, data);
+    },
+
+    /**
+     * setTableInfo
+     */
     setTableInfo(state, data) {
       state.activedTable = data.activedTable;
+
       let tables = [];
       state.cardPrice.forEach((item, idx) => {
         let table = {
@@ -555,72 +499,59 @@ export default {
           progress: null,
           isActive: data.activedTable[idx],
         };
+
         tables.push(table);
       });
+
       state.cards = tables;
 
       let tempTables = [];
       data.activedTable.forEach((item) => {
         if (item) tempTables.push(item);
       });
+
       state.accountInfo.tableCount = tempTables.length || 0;
     },
 
+    /**
+     * setGlobalInfo
+     */
     setGlobalInfo(state, data) {
       state.globalInfo = data;
     },
 
+    /**
+     * setProgressInfo
+     */
     setProgressInfo(state, data) {
       state.cards.forEach((item, idx) => {
         item.progress = data[idx];
       });
     },
 
-    // user
-    setAccountInfo(state, data) {
-      let info = {
-        ...state.accountInfo, ...data,
-      };
-
-      state.accountInfo = info;
-    },
-
-    clearAccountInfo(state) {
-      state.accountInfo = {
-        id: null,
-        webId: null,
-        address: null,
-        password: null,
-        date: null,
-        referalAddress: null,
-        referalCount: null,
-        paymant: {
-          table: null, referal: null, pullDeposit: null, pull: null, pullReferal: null,
-        },
-        isAgree: Cookies.get("isAgree") || false,
-      };
-    },
-
-    setAccountId(state, data) {
-      state.accountInfo.id = data;
-    },
-
-    setAddress(state, data) {
-      state.accountInfo.address = data;
-    },
-
+    /**
+     * setActiveTable
+     */
     setActiveTable(state, data) {
-      state.cards[data.lvl - 1].isActive = data.status;
+      state.cards[data.lvl - 1].isActive = data.isActive;
+
       let activedTable = [...state.activedTable];
-      activedTable[data.lvl - 1] = data.status;
+      activedTable[data.lvl - 1] = data.isActive;
       state.activedTable = activedTable;
     },
 
+    /**
+     * setAgree
+     */
     setAgree(state, data) {
-      state.accountInfo.isAgree = data;
-      Cookies.set("isAgree", data);
+      if (data) {
+        state.accountInfo.isAgree = data;
+        Cookies.set("isAgree", data);
+      } else {
+        state.accountInfo.isAgree = false;
+        Cookies.remove("isAgree");
+      }
     },
-
   },
   state: {
     cards: [
@@ -637,34 +568,44 @@ export default {
     ],
     cardPrice: [0.04, 0.07, 0.12, 0.2, 0.35, 0.6, 1.3, 2.1, 3.3, 4.7, 6, 8, 11, 14, 16, 20],
     accountInfo: {
-      id: null,
       webId: null,
       address: null,
-      password: null,
-      date: null,
-      referalAddress: null,
-      referalCount: null,
-      tableCount: null,
+      referralAddress: null,
+      referralCount: null,
       paymant: {
-        table: null, referal: null, pullDeposit: null, pull: null, pullReferal: null,
+        table: null,
+        referral: null,
+        pull: null,
+        pullDeposit: null,
+        pullReferral: null,
       },
       isAgree: false,
     },
     globalInfo: {
-      accountCount: null, tableCount: null, pullMoney: null, tableMoney: null, pullCount: null, pullPaymant: null,
+      accountCount: null,
+      tableCount: null,
+      pullMoney: null,
+      tableMoney: null,
+      pullCount: null,
+      pullPaymant: null,
     },
     activedTable: [],
     error: {
-      msg: null, name: null, env: null,
+      msg: null,
+      name: null,
+      env: null,
     },
     response: null,
   },
   getters: {
-    getContractInfo(state) {
+    getAllInfo(state) {
       return state;
     },
     getAccountInfo(state) {
       return state.accountInfo;
+    },
+    getGlobalInfo(state) {
+      return state.globalInfo;
     },
     getError(state) {
       return state.error;

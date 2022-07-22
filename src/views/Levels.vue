@@ -9,13 +9,20 @@
       </div>
 
       <ul class="list levels">
-        <Card class="level-item" v-for="(card, index) in getContractInfo.cards" :key="index" :cards="card"
-              :isLoading="cardLoading" @BUY-cardId="buyTableEvent" @REINVEST-cardId="reinvestCardEvent"></Card>
+        <Card
+            class="level-item"
+            v-for="(card, index) in getAllInfo.cards"
+            :key="index"
+            :cards="card"
+            @BUY-cardId="buyTableEvent"
+            @REINVEST-cardId="reinvestCardEvent"
+        ></Card>
+
         <SuccessModal :propIsOpen="true" v-if="getResponse">
-          Стол был успешно куплен!
+          {{ $t("success.tablePurchased") }}
         </SuccessModal>
         <ErrorModal v-if="getError.msg === 'Level already active'" :propIsOpen="true">
-          {{ $t("success.tablePurchased") }}
+          {{ $t("error.tableIsPurchased") }}
         </ErrorModal>
         <ErrorModal v-if="getError.msg === 'User denied transaction signature'" :propIsOpen="true">
           {{ $t("error.cancel") }}
@@ -41,19 +48,19 @@
         <ul class="block">
           <li class="item">
             <p>ID:</p>
-            <span>{{ getAccountInfo.id }}</span>
+            <span>{{ getAccountInfo.webId }}</span>
           </li>
           <li class="item">
-            <p>referers:</p>
-            <span>{{ getAccountInfo.referalCount }}</span>
+            <p>referrers:</p>
+            <span>{{ getAccountInfo.referralCount }}</span>
           </li>
           <li class="item">
             <p>reward from tables:</p>
             <span>{{ getAccountInfo.paymant.table }}</span>
           </li>
           <li class="item">
-            <p>reward from referers:</p>
-            <span>{{ getAccountInfo.paymant.referal }}</span>
+            <p>reward from referrers:</p>
+            <span>{{ getAccountInfo.paymant.referral }}</span>
           </li>
         </ul>
         <ul class="block">
@@ -63,30 +70,27 @@
           </li>
           <li class="item">
             <p>online:</p>
-            <span>{{ getContractInfo.globalInfo.accountCount }}</span>
+            <span>{{ getGlobalInfo.accountCount }}</span>
           </li>
           <li class="item">
             <p>Number of transactions:</p>
-            <span>{{ getContractInfo.globalInfo.tableCount }}</span>
+            <span>{{ getGlobalInfo.tableCount }}</span>
           </li>
           <li class="item">
             <p>total turnover:</p>
-            <span>{{ getContractInfo.globalInfo.tableMoney }}</span>
+            <span>{{ getGlobalInfo.tableMoney }}</span>
           </li>
         </ul>
         <ul class="block info">
           <li class="item">
-            <p>Referal Link:</p>
-            <textarea type="text" class="passwords referal-link" :value="referalLink" disabled
-                      id="referalLink"></textarea>
-          </li>
-          <li class="item item-passwords">
-            <p>Passwords:</p>
-            <ul class="passwords">
-              <li v-for="(pass, index) in this.getAccountInfo.password" :key="index">
-                <p>{{ pass }}</p>
-              </li>
-            </ul>
+            <p>Referral Link:</p>
+            <textarea
+                type="text"
+                class="passwords referral-link"
+                :value="referralLink"
+                disabled
+                id="referralLink"
+            ></textarea>
           </li>
         </ul>
       </div>
@@ -122,31 +126,37 @@ export default {
   data() {
     return {
       isLoading: true,
-      cardLoading: true,
-      referalLink: null,
+      referralLink: null,
       address: null,
     };
   },
   computed: {
-    ...mapGetters(["getAccountInfo", "getContractInfo", "getError", "getResponse"]),
+    ...mapGetters(["getAllInfo", "getAccountInfo", "getGlobalInfo", "getError", "getResponse"]),
   },
   mounted() {
     if (typeof window.ethereum === "undefined") this.$router.push({name: "Home"});
     else {
-      this.address = this.getAccountInfo.address;
+      this.init();
 
       window.ethereum.on("accountsChanged", (accounts) => {
         this.address = accounts[0];
         this.init();
       });
-
-      this.init();
     }
+
+    setInterval(async () => {
+      await this.$store.dispatch("getFullUserInfo", this.address);
+      await this.$store.dispatch("getUserLevels", this.address);
+      await this.$store.dispatch("getUserTableProgress", this.address);
+      await this.$store.dispatch("getGlobalStat", this.address);
+      await this.$store.dispatch("getPullsInfo", this.address);
+      await this.activedTable();
+    }, 5000);
   },
   methods: {
     // Clicked
     async buyTableEvent(value) {
-      if (value.isActive && this.getContractInfo.cards[value.lvl].isActive) {
+      if (value.isActive && this.getAllInfo.cards[value.lvl].isActive) {
         this.$store.dispatch("setError", {
           msg: "Level already active",
           name: "Level already active",
@@ -158,14 +168,12 @@ export default {
       const tableInfo = {
         lvl: value.lvl,
         price: value.price,
-        referalId: this.getAccountInfo.referalId,
+        referralId: this.getAccountInfo.referralId,
       };
 
       await this.$store.dispatch("buyTable", tableInfo);
 
-      this.cardLoading = true;
       if (!this.getError.msg) this.getData();
-      else this.cardLoading = false;
     },
 
     // Clicked
@@ -176,56 +184,44 @@ export default {
 
       await this.$store.dispatch("reinvest", tableInfo);
 
-      this.cardLoading = true;
       if (!this.getError.msg) this.getData();
-      else this.cardLoading = false;
     },
 
     // Set active status for table
     activedTable() {
-      let tables = this.getContractInfo.cards;
+      let tables = this.getAllInfo.cards;
 
       if (!tables[0].isActived) {
-        this.$store.dispatch("activeTable", {lvl: 1, status: true});
+        this.$store.dispatch("activeTable", {lvl: 1, isActive: true});
       }
     },
 
     // Init page
     async init() {
-      this.cardLoading = true;
       this.isLoading = true;
 
-      await window.ethereum.request({method: "eth_requestAccounts"}).then((res) => {
-        this.$store.dispatch("getAccountInfo", res[0]);
-        this.address = res[0];
-      });
-
-      await this.$store.dispatch("clearAccountInfo");
-      await this.$store.dispatch("getAccountInfo", this.address);
-
-      if (!this.getAccountInfo.password) this.$router.push({name: "Home"});
+      await window.ethereum
+          .request({method: "eth_requestAccounts"})
+          .then((res) => this.address = res[0])
+          .catch(() => this.$router.push({name: "Home"}));
 
       await this.getData();
+
       // Create ref link
-      this.referalLink = `${window.location.origin}/?referalId=${this.getAccountInfo.address}`;
+      this.referralLink = `${window.location.origin}/?referralId=${this.getAccountInfo.address}`;
     },
 
     async getData() {
       await this.$store.dispatch("getFullUserInfo", this.address);
+
+      if (this.getAccountInfo.webId === '0') this.$router.push({name: "Home"});
       await this.$store.dispatch("getUserLevels", this.address);
       await this.$store.dispatch("getUserTableProgress", this.address);
       await this.$store.dispatch("getGlobalStat", this.address);
-      await this.$store.dispatch("GetPullsInfo", this.address);
+      await this.$store.dispatch("getPullsInfo", this.address);
       await this.activedTable();
 
-      await this.$store.dispatch("checkPassCount", {
-        address: this.address,
-        refCount: parseInt(this.getAccountInfo.referalCount),
-        tableCount: this.getAccountInfo.tableCount,
-      });
-
       this.isLoading = false;
-      this.cardLoading = false;
     },
   },
 };

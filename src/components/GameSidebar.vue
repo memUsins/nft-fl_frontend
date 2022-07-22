@@ -10,7 +10,6 @@
       <router-link class="link" active-class="active" to="/promo">{{ $t("pages.promo.title") }}</router-link>
       <router-link class="link" active-class="active" to="/howuse">{{ $t("pages.howuse.link") }}</router-link>
       <router-link class="link" active-class="active" to="/stats">{{ $t("pages.stats.title") }}</router-link>
-      <router-link class="link" active-class="active" to="/passwords">{{ $t("pages.passwords.title") }}</router-link>
     </div>
   </div>
 </template>

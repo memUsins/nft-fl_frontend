@@ -8,11 +8,11 @@
       <ul class="block">
         <li class="item">
           <p>ID:</p>
-          <span>{{ getAccountInfo.id }}</span>
+          <span>{{ getAccountInfo.webId }}</span>
         </li>
         <li class="item">
           <p>referers:</p>
-          <span>{{ getAccountInfo.referalCount }}</span>
+          <span>{{ getAccountInfo.referralCount }}</span>
         </li>
         <li class="item">
           <p>reward from tables:</p>
@@ -20,7 +20,7 @@
         </li>
         <li class="item">
           <p>reward from referers:</p>
-          <span>{{ getAccountInfo.paymant.referal }}</span>
+          <span>{{ getAccountInfo.paymant.referral }}</span>
         </li>
       </ul>
       <ul class="block">
@@ -30,17 +30,26 @@
         </li>
         <li class="item">
           <p>online:</p>
-          <span>{{ getContractInfo.globalInfo.accountCount }}</span>
+          <span>{{ getGlobalInfo.accountCount }}</span>
         </li>
         <li class="item">
           <p>Number of transactions:</p>
-          <span>{{ getContractInfo.globalInfo.tableCount }}</span>
+          <span>{{ getGlobalInfo.tableCount }}</span>
         </li>
         <li class="item">
           <p>total turnover:</p>
-          <span>{{ getContractInfo.globalInfo.tableMoney }}</span>
+          <span>{{ getGlobalInfo.tableMoney }}</span>
         </li>
       </ul>
+    </div>
+    <div class="loading overlay" v-show="isLoading">
+      <div class="loader">
+        <span class="a"></span>
+        <span class="b spin">
+          <span class="c"></span>
+        </span>
+      </div>
+      {{ $t("loading") }}
     </div>
   </div>
 </template>
@@ -52,21 +61,22 @@ export default {
   name: "stats",
   data() {
     return {
+      isLoading: true,
       address: null,
     };
   },
   computed: {
-    ...mapGetters(["getAccountInfo", "getContractInfo", "getError", "getResponse"]),
+    ...mapGetters(["getAccountInfo", "getAllInfo", "getGlobalInfo", "getError", "getResponse"]),
   },
   mounted() {
     if (typeof window.ethereum === "undefined") this.$router.push({name: "Home"});
     else {
-      this.address = this.getAccountInfo.address;
-
       window.ethereum.on("accountsChanged", (accounts) => {
         this.address = accounts[0];
         this.init();
       });
+
+      if (this.getAccountInfo.webId === '0') this.$router.push({name: "Home"});
 
       this.init();
     }
@@ -74,29 +84,21 @@ export default {
   methods: {
     // Init page
     async init() {
-      await window.ethereum.request({method: "eth_requestAccounts"}).then((res) => {
-        this.$store.dispatch("getAccountInfo", res[0]);
-        this.address = res[0];
-      });
-      this.address = this.getAccountInfo.address;
+      this.isLoading = true;
 
-      await this.$store.dispatch("clearAccountInfo");
-      await this.$store.dispatch("getAccountInfo", this.address);
-
-      if (!this.getAccountInfo.password) this.$router.push({name: "Home"});
+      await window.ethereum
+          .request({method: "eth_requestAccounts"})
+          .then((res) => this.address = res[0])
+          .catch(() => this.$router.push({name: "Home"}));
 
       await this.getData();
     },
 
     async getData() {
       await this.$store.dispatch("getFullUserInfo", this.address);
+      if (this.getAccountInfo.webId === '0') this.$router.push({name: "Home"});
       await this.$store.dispatch("getGlobalStat", this.address);
-
-      await this.$store.dispatch("checkPassCount", {
-        address: this.address,
-        refCount: parseInt(this.getAccountInfo.referalCount),
-        tableCount: this.getAccountInfo.tableCount,
-      });
+      this.isLoading = false;
     },
   }
 }

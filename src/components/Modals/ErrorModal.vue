@@ -25,7 +25,7 @@ export default {
   methods: {
     closeModal() {
       this.isOpen = false;
-      this.$store.dispatch("clearError");
+      this.$store.dispatch("setError", null);
     },
   },
 };

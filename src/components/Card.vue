@@ -46,12 +46,10 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
 
 export default {
   name: "card",
   props: ["cards", "isLoading"],
-  computed: {...mapGetters(["getContractInfo"])},
   methods: {
     Buy(id) {
       return this.$emit("BUY-cardId", id);

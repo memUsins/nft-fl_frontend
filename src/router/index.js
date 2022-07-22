@@ -4,7 +4,6 @@ import Levels from "@/views/Levels";
 import Promo from "@/views/Promo";
 import HowUse from "@/views/HowUse";
 import Stats from "@/views/Stats";
-import Passwords from "@/views/Passwords";
 
 const routes = [
   {
@@ -46,14 +45,6 @@ const routes = [
       layout: "game",
     },
     component: Stats,
-  },
-  {
-    path: "/passwords",
-    name: "Passwords",
-    meta: {
-      layout: "game",
-    },
-    component: Passwords,
   },
 ];
 

@@ -1,30 +1,17 @@
 <template>
-  <form class="auth-form form" @submit.prevent="register" v-if="!getAccountInfo.id">
-    <input type="text" name="password" class="input" :placeholder="$t('enterPass')" :class="checkPass"
-           v-model="password"/>
-
-    <button class="button button_gradient" :disabled="checkPass.error">
+  <form class="auth-form form" @submit.prevent="register" v-if="getAccountInfo.webId === '0'">
+    <button class="button button_gradient">
       {{ $t("connect") }}
     </button>
-    <div v-if="loginError" class="modal">
-      <h3>{{ $t("errorTitle") }}!</h3>
-      <p>{{ $t("error.isNotAuth") }}!</p>
-    </div>
-    <errorModal v-if="getError.name === 'ADDRESS_USED'" propIsOpen="true">
-      {{ $t("error.addressExist") }}
-    </errorModal>
-    <errorModal v-if="getError.name === 'PASSWORD_USED'" propIsOpen="true">
-      {{ $t("error.passUsed") }}
-    </errorModal>
-    <errorModal v-if="getError.name === 'PASSWORD_NOT_FOUND'" propIsOpen="true">
-      {{ $t("error.noSuchPass") }}
+    <errorModal v-if="getError.msg === 'Metamask is not auth'" propIsOpen="true">
+      {{ $t("error.isNotAuth") }}
     </errorModal>
     <errorModal v-if="getError.msg === 'User denied transaction signature'" propIsOpen="true">
       {{ $t("error.cancel") }}
     </errorModal>
     <agreeModal :propIsOpen="agreeOpen"></agreeModal>
   </form>
-  <div v-else>
+  <div class="auth-form form" v-else>
     <router-link to="/levels" class="button button_gradient">
       {{ $t("connect") }}
     </router-link>
@@ -35,68 +22,42 @@
 import {mapGetters} from "vuex";
 import errorModal from "./Modals/ErrorModal";
 import agreeModal from "./Modals/AgreeModal";
-import axios from "axios";
 
 export default {
   name: "auth-form",
   data() {
     return {
-      password: null,
-      loginError: false,
+      isLoading: true,
       agreeOpen: false,
-      isDisabled: false,
     };
   },
   components: {errorModal, agreeModal},
   computed: {
     ...mapGetters(["getAccountInfo", "getError", "getResponse"]),
-
-    checkPass() {
-      return {
-        error: this.password !== null && !this.password,
-      };
-    },
   },
   methods: {
     async register() {
-      if (!this.password) return (this.password = "");
-      this.isDisabled = true;
-
       // Agree terms
       if (!this.getAccountInfo.isAgree) this.agreeOpen = true;
       else this.agreeOpen = false;
 
       // Metamask error
       if (!this.getAccountInfo.address) {
-        this.isDisabled = false;
-        return this.loginError = true;
+        this.$store.dispatch("setError", {
+          name: "Metamask is not auth",
+          msg: "Metamask is not auth",
+          env: "metamask"
+        });
       }
 
+      // Register
       if (this.getAccountInfo.isAgree) {
-        await this.$store.dispatch("checkPassword", this.password);
+        let referralId = localStorage.getItem("referralId") || this.$route.query.referralId || 0;
 
-        // Is correct password
-        if (this.getResponse !== null && this.getError.msg === null) {
-          await this.$store.dispatch("clearResponse");
-
-          // Check local referal
-          let referalId = this.$route.query.referalId || 0;
-
-          let localReferal = localStorage.getItem("referalId");
-          let checkLocalReferal = await axios.get(`${process.env.VUE_APP_API}account/${localReferal}`).then((res) => res).catch(() => false);
-
-          if (checkLocalReferal) referalId = localReferal;
-
-          let data = {
-            password: this.password,
-            referalId
-          };
-
-          await this.$store.dispatch("register", data);
-        }
+        await this.$store.dispatch("register", referralId);
+        await this.$store.dispatch("getFullUserInfo");
+        this.$router.push({name: "Home"})
       }
-
-      this.isDisabled = false;
     },
   },
 };

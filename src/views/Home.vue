@@ -145,7 +145,7 @@
       <div class="block-list">
         <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.one')"></div>
         <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.two')"></div>
-        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.thee')"></div>
+        <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.three')"></div>
         <div class="block block_bg" v-html="$t('pages.home.aboutNumbers.text.four')"></div>
       </div>
       <!-- Float picture -->
