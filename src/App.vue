@@ -20,6 +20,7 @@ export default {
     }
 
     if (Cookies.get("isAgree")) this.$store.dispatch("setAgree", true);
+    this.setTitle();
   },
   beforeUpdate() {
     this.setReferalId();
@@ -34,12 +35,20 @@ export default {
       if (this.$route.query.referalId && !localStorage.getItem("referalId")) {
         localStorage.setItem("referalId", this.$route.query.referalId);
       }
-    }
+    },
+    setTitle() {
+      let title = this.$route.name.toLowerCase();
+      document.title = this.$t(`pages.${title}.pageTitle`);
+    },
   },
   watch: {
     "$i18n.locale": function (newVal) {
       localStorage.setItem("last-locale", newVal);
+      this.setTitle();
     },
+    $route: function () {
+      this.setTitle();
+    }
   },
   components: {EmptyLayout, MainLayout, GameLayout},
 };

@@ -81,6 +81,5 @@
 <script>
 export default {
   name: "Promo",
-
 }
 </script>

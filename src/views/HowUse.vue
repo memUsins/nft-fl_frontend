@@ -24,6 +24,5 @@
 <script>
 export default {
   name: "HowUse",
-
 }
 </script>

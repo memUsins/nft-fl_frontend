@@ -70,7 +70,6 @@ export default {
     this.init();
   },
   methods: {
-
     // Init page
     async init() {
       await window.ethereum.request({method: "eth_requestAccounts"}).then((res) => {

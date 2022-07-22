@@ -185,9 +185,6 @@ export default {
   mounted() {
     if (typeof window.ethereum !== "undefined") this.isEthereum = true;
   },
-  created() {
-    document.title = this.$route.meta.title;
-  },
   components: {AuthForm, LocalePicker},
 };
 </script>

@@ -408,8 +408,8 @@ export default {
       address = address[0];
 
       // Set user id
-      let userId = data.referalId || 0;
-      let metaUserId = 0;
+      let userId = data.referalId || 1;
+      let metaUserId = 1;
 
       // Check referal
       if (data.referalId) {
@@ -427,8 +427,8 @@ export default {
             .GetUserId(data.referalId)
             .call({from: address})
             .then((res) => res)
-            .catch(() => 0);
-        } else metaUserId = 0;
+            .catch(() => 1);
+        }
       }
 
       // Register in chain

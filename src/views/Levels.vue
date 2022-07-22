@@ -127,9 +127,6 @@ export default {
       address: null,
     };
   },
-  created() {
-    document.title = this.$route.meta.title;
-  },
   computed: {
     ...mapGetters(["getAccountInfo", "getContractInfo", "getError", "getResponse"]),
   },

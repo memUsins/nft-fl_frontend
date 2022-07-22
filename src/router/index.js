@@ -42,7 +42,7 @@ const routes = [
     name: "HowUse",
     meta: {
       layout: "game",
-      title: t("pages.promo.pageTitle"),
+      title: t("pages.howuse.pageTitle"),
     },
     component: HowUse,
   },
@@ -51,7 +51,7 @@ const routes = [
     name: "Stats",
     meta: {
       layout: "game",
-      title: t("pages.promo.pageTitle"),
+      title: t("pages.stats.pageTitle"),
     },
     component: Stats,
   },
@@ -60,7 +60,7 @@ const routes = [
     name: "Passwords",
     meta: {
       layout: "game",
-      title: t("pages.promo.pageTitle"),
+      title: t("pages.passwords.pageTitle"),
     },
     component: Passwords,
   },
