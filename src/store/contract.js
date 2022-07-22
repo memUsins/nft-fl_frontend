@@ -331,7 +331,7 @@ export default {
         .then((res) => {
           let response = {
             accountCount: res[0],
-            tableCount: res[1],
+            tableCount: res[1] - 93,
             pullMoney: res[2],
             tableMoney: web3.utils.fromWei(String(res[3]), "ether"),
             pullCount: res[4],

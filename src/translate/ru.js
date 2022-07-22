@@ -157,7 +157,7 @@ export default {
 
   stats: {
     referrers: "Команда",
-    rewardTable: "Вознаграждение со столов",
+    rewardTable: "Вознаграждение с уровней",
     rewardReferrers: "Вознаграждение с команды",
     reinvest: "Сумма на реинвест",
     online: "Количество участников",
