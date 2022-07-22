@@ -153,5 +153,15 @@ export default {
       or lose.
     `,
     compete: "Accept"
-  }
+  },
+
+  stats: {
+    referrers: "Referrers",
+    rewardTable: "Reward from tables",
+    rewardReferrers: "Reward from referrers",
+    reinvest: "Reinvest value",
+    online: "Online",
+    transactionNumber: "Number of transactions",
+    turnover: "Total turnover"
+  },
 };

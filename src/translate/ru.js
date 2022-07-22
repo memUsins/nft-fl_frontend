@@ -153,5 +153,15 @@ export default {
       или проиграю.
     `,
     compete: "Принять"
-  }
+  },
+
+  stats: {
+    referrers: "Команда",
+    rewardTable: "Вознаграждение со столов",
+    rewardReferrers: "Вознаграждение с команды",
+    reinvest: "Сумма на реинвест",
+    online: "Количество участников",
+    transactionNumber: "Количество транзакций",
+    turnover: "Оборот"
+  },
 };

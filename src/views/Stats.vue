@@ -11,33 +11,33 @@
           <span>{{ getAccountInfo.webId }}</span>
         </li>
         <li class="item">
-          <p>referers:</p>
+          <p>{{ $t("stats.referrers") }}:</p>
           <span>{{ getAccountInfo.referralCount }}</span>
         </li>
         <li class="item">
-          <p>reward from tables:</p>
+          <p>{{ $t("stats.rewardTable") }}:</p>
           <span>{{ getAccountInfo.paymant.table }}</span>
         </li>
         <li class="item">
-          <p>reward from referers:</p>
+          <p>{{ $t("stats.rewardReferrers") }}:</p>
           <span>{{ getAccountInfo.paymant.referral }}</span>
         </li>
       </ul>
       <ul class="block">
         <li class="item">
-          <p>reinvest value:</p>
+          <p>{{ $t("stats.reinvest") }}:</p>
           <span>{{ getAccountInfo.paymant.pullDeposit }}</span>
         </li>
         <li class="item">
-          <p>online:</p>
+          <p>{{ $t("stats.online") }}:</p>
           <span>{{ getGlobalInfo.accountCount }}</span>
         </li>
         <li class="item">
-          <p>Number of transactions:</p>
+          <p>{{ $t("stats.transactionNumber") }}:</p>
           <span>{{ getGlobalInfo.tableCount }}</span>
         </li>
         <li class="item">
-          <p>total turnover:</p>
+          <p>{{ $t("stats.turnover") }}:</p>
           <span>{{ getGlobalInfo.tableMoney }}</span>
         </li>
       </ul>
